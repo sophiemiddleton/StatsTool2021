@@ -3,12 +3,20 @@
 # Purpose : Stats functions
 
 import sys
+import math
+from ROOT import TMath, TH1F
 
 class StatsFunctions :
 
     def __init__(self):
         """ Initialise the Class Object """
-
+        self.momentum_lower_limit = 90.
+        self.momentum_upper_limit = 110.
+        self.nBins = 400
+        self.nBin_steps = (self.momentum_upper_limit-self.momentum_lower_limit)/self.nBins
+        self.momentum_Bin_width = 0.05
+        self.signal_start = 103.75
+        self.signal_end = 105.45
         '''
         Feldman-Cousins experimental sensitivities (defined as the average upper limit
         that would be obtained by an ensemble of experiments with the expected background
@@ -426,3 +434,73 @@ class StatsFunctions :
         ,  6.733866,  6.74901,  6.750087,  6.751164,  6.752242   # 9.95
         ,  6.753319,  6.755077,  6.756151,  6.757224,  6.758298   # 9.975
         ,  6.759371]
+
+
+    """
+    Function to return upper limit sensitivity for corresponding background estimate
+    using Feldman-Cousins at 90%CL
+    """
+    def return_FeldmanCousins_sensitivity(self, background_mean):
+        if (background_mean < 10): # have only values up to 10 background events in table, will not work for wide DIO spectrum
+                nb        = 2001
+                bInterval = 0.005
+                background_mean_rounded_array_index = TMath.Nint(background_mean / bInterval)
+                if (background_mean_rounded_array_index>0):
+                    if (background_mean_rounded_array_index < nb):
+                        print("background_mean_rounded_array_index : ", background_mean_rounded_array_index)
+                        return FeldmanCousins_sensitivityValues[background_mean_rounded_array_index]
+                    else:
+                        return 0
+                else:
+                     return 0
+        else:
+            return 999
+
+    def return_histogram_integral(self, histo, mom_low, mom_high):
+        # Translate mom_low and mom_up in bin numbers
+        bin_low = TMath.Nint((mom_low - self.momentum_lower_limit) / self.momentum_Bin_width) + 1
+        bin_high = TMath.Nint((mom_high - self.momentum_lower_limit) / self.momentum_Bin_width) + 1
+        return histo.Integral(bin_low,bin_high)
+
+    def double calc_Nrec(self, histo, mom_low, mom_high): #TODO: Add a process code here
+        double Nrec = return_histogram_integral(histo, mom_low, mom_high)
+        if (abs(mom_low - 103.5) < 0.01 and abs(mom_high - 105.5) < 0.01):#TODO remove hardcoding
+            print("Nrec = ", Nrec)
+        return Nrec
+
+    def double calc_Nrec_error(self, histo, mom_low,  mom_high):
+        Nrec_error = 0
+    	# compute error from sum of weigths in the bins
+    	# translate mom_low and mom_up in bin numbers
+    	bin_low = TMath.Nint((mom_low - self.momentum_lower_limit) / self.momentum_Bin_width) + 1
+    	int bin_high = TMath.Nint((mom_high - self.momentum_lower_limit) / self.momentum_Bin_width) + 1
+    	temp_error_sum = 0
+    	for i in range(bin_low, bin_high):
+    		temp_error_sum += pow(histo.GetBinError(i), 2)
+    	Nrec_error = math.sqrt(temp_error_sum)
+        return Nrec_error
+
+    def calc_efficiency(self, Nrec, Ngen):
+        efficiency = Nrec / Ngen
+        return efficiency
+
+    def calc_efficiency_error(self, Nrec, Ngen):
+        """
+        use Glen Cowan derivation of efficiency error based on a binomial distribution
+        http://www.pp.rhul.ac.uk/~cowan/stat/notes/efferr.pdf
+        """
+
+    	efficiency_error = math.sqrt(Nrec * (1. - Nrec/Ngen)) / Ngen
+        return efficiency_error
+
+    #TODO: Make this its own class:
+
+    def calc_SES(self, POT, stopsperPOT, capturesperStop, efficiency_CE):
+        # calculate single event sensitivity (SES), corresponds to branching fraction where 1 signal event is observed
+    	SES = 1. / ( POT * stopsperPOT * capturesperStop * efficiency_CE )
+    	return SES
+
+    def calc_SES_error(self, POT, stopsperPOT, capturesperStop, efficiency_CE, efficiency_error_CE):
+        # calculate error of single event sensitivity (SES), corresponds to uncertainting on branching fraction where 1 signal event is observed
+    	double SES = 1. / ( POT * stopsperPOT * capturesperStop * pow(efficiency_CE, 2) ) * efficiency_error_CE # error propagation on SES calculation
+        return SES
