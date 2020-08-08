@@ -8,7 +8,7 @@ import pandas
 
 class ImportData :
 
-    def __init__(self, fileName , treeName, branchName, flatten = False, featureList = None):
+    def __init__(self, fileName , treeName = TrkAnaNeg, branchName = trkana, flatten = False, featureList = None):
         """ Initialise the Class Object """
         self.FileName= fileName
         self.TreeName = treeName
