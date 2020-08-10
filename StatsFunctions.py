@@ -10,7 +10,7 @@ import Histograms
 
 class StatsFunctions :
 
-    def __init__(self):
+    def __init__(self, histos):
         """ Initialise the Class Object """
         self.momentum_lower_limit = 90.
         self.momentum_upper_limit = 110.
@@ -19,6 +19,10 @@ class StatsFunctions :
         self.momentum_Bin_width = 0.05
         self.signal_start = 103.75
         self.signal_end = 105.45
+        self.POT = 3.6e20
+        self.capturesperStop = 0.609
+        self.decaysperStop = 0.391
+        self.Histos = histos
         '''
         Feldman-Cousins experimental sensitivities (defined as the average upper limit
         that would be obtained by an ensemble of experiments with the expected background
@@ -548,4 +552,7 @@ class StatsFunctions :
     def calc_BF_upper_limit_error(self, Nsig_UL, Nsig_UL_error, POT, stopsperPOT, capturesperStop, efficiency_CE, efficiency_error_CE):
     	BF_upper_limit_error = 1. / (POT * stopsperPOT * capturesperStop) * math.sqrt(pow(Nsig_UL_error/efficiency_CE, 2)
         + pow(Nsig_UL * efficiency_error_CE/(efficiency_CE*efficiency_CE), 2))
-        return BF_upper_limit_error;
+        return BF_upper_limit_error
+
+    def stopsperPOT(self, Ngen_CE):
+        return Ngen_CE / (75. * 100. * 10000.)

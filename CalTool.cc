@@ -875,8 +875,6 @@ double calc_BF_upper_limit_error(double Nsig_UL, double Nsig_UL_error, double PO
 	return BF_upper_limit_error;
 }
 
-
-
 //void CalTool(double Ngen_CE, double Ngen_DIO, std::string inputfilename_CE_reconstructed, std::string inputfilename_DIO_reconstructed)
 int main(int argc, char* argv[]) {
 	if (argc < 6) {
@@ -1081,59 +1079,38 @@ int main(int argc, char* argv[]) {
 		for (double mom_high=mom_low+0.05; mom_high<momentum_upper_limit; mom_high+=momentum_Bin_width) {
 
 			results_struct results;
-
 			// perform calculations, check results for reasanable vales and for infinity or NaN, save results
 			results.momentum_low=mom_low;
 			if (TMath::Finite(results.momentum_low)<1) continue;
 
-//			cout << "results.momentum_low  = " << results.momentum_low << endl;
-
 			results.momentum_high=mom_high;
 			if (TMath::Finite(results.momentum_high)<1) continue;
-
-//			cout << "results.momentum_high = " << results.momentum_high << endl;
 
 			results.N_CE_gen=Ngen_CE;
 			if (TMath::Finite(results.N_CE_gen)<1) continue;
 
-//			cout << "results.N_CE_gen = " << results.N_CE_gen << endl;
-
 			results.N_CE_rec=calc_Nrec(histo_CE_reconstructed,mom_low,mom_high);
 			if (TMath::Finite(results.N_CE_rec)<1) continue;
-
-//			cout << "results.N_CE_rec = " << results.N_CE_rec << endl;
 
 			results.efficiency_CE=calc_efficiency(results.N_CE_rec,results.N_CE_gen);
 			if (TMath::Finite(results.efficiency_CE)<1) continue;
 
-//			cout << "results.efficiency_CE = " << results.efficiency_CE << endl;
-
 			results.efficiency_error_CE=calc_efficiency_error(results.N_CE_rec,results.N_CE_gen);
 			if (TMath::Finite(results.efficiency_error_CE)<1) continue;
-
-//			cout << "results.efficiency_error_CE = " << results.efficiency_error_CE << endl;
 
 			results.N_CE_expected=calc_N_CE_expected(POT,stopsperPOT,capturesperStop,results.efficiency_CE);
 			if (TMath::Finite(results.N_CE_expected)<1) continue;
 			if (results.N_CE_expected==0) continue;
 
-//			cout << "results.N_CE_expected = " << results.N_CE_expected << endl;
-
 			results.N_CE_expected_error=calc_N_CE_expected(POT,stopsperPOT,capturesperStop,results.efficiency_error_CE);
 			if (TMath::Finite(results.N_CE_expected_error)<1) continue;
 			if (results.N_CE_expected_error==0) continue;
 
-//			cout << "results.N_CE_expected_error = " << results.N_CE_expected_error << endl;
-
 			results.SES=calc_SES(POT,stopsperPOT,capturesperStop,results.efficiency_CE);
 			if (TMath::Finite(results.SES)<1) continue;
 
-//			cout << "results.SES = " << results.SES << endl;
-
 			results.SES_error=calc_SES_error(POT,stopsperPOT,capturesperStop,results.efficiency_CE,results.efficiency_error_CE);
 			if (TMath::Finite(results.SES_error)<1) continue;
-
-//			cout << "results.SES_error = " << results.SES_error << endl;
 
 			results.N_DIO_gen=calc_Nrec(histo_DIO_generated_reweighted, mom_low,mom_high); // use same function as for reconstructed DIOs to integrate histograms
 			if (TMath::Finite(results.N_DIO_gen)<1) continue;
@@ -1142,9 +1119,6 @@ int main(int argc, char* argv[]) {
 
 			results.N_DIO_gen_error=calc_Nrec_error(histo_DIO_generated_reweighted, mom_low,mom_high);
 			if (TMath::Finite(results.N_DIO_gen_error)<1) continue;
-
-//			cout << "results.N_DIO_gen_error = " << results.N_DIO_gen_error << endl;
-
 			results.N_DIO_rec=calc_Nrec(histo_DIO_reconstructed_reweighted,mom_low,mom_high);
 			if (TMath::Finite(results.N_DIO_rec)<1) continue;
 
@@ -1153,82 +1127,42 @@ int main(int argc, char* argv[]) {
 			results.N_DIO_rec_error=calc_Nrec_error(histo_DIO_reconstructed_reweighted,mom_low,mom_high);
 			if (TMath::Finite(results.N_DIO_rec_error)<1) continue;
 
-//			cout << "results.N_DIO_rec_error = " << results.N_DIO_rec_error << endl;
-
 			results.efficiency_DIO=calc_efficiency(results.N_DIO_rec,results.N_DIO_gen);
 			if (TMath::Finite(results.efficiency_DIO)<1) continue;
 
-//			cout << "results.efficiency_DIO = " << results.efficiency_DIO << endl;
-
-//			results.efficiency_error_DIO=calc_efficiency_error(results.N_DIO_rec,results.N_DIO_gen);
 			results.efficiency_error_DIO=calc_efficiency_error_DIO(results.N_DIO_rec, results.N_DIO_rec_error, results.N_DIO_gen, results.N_DIO_gen_error);
 			if (TMath::Finite(results.efficiency_error_DIO)<1) continue;
-
-//			cout << "results.efficiency_error_DIO = " << results.efficiency_error_DIO << endl;
-
 
 			results.N_DIO_expected=calc_N_DIO_expected(results.N_DIO_rec,results.N_DIO_gen,POT,stopsperPOT,decaysperStop,mom_low,mom_high);
 			if (TMath::Finite(results.N_DIO_expected)<1) continue;
 
-//			cout << "results.N_DIO_expected = " << results.N_DIO_expected << endl;
-
 			results.N_DIO_expected_error=calc_N_DIO_expected_error(results.efficiency_error_DIO,POT,stopsperPOT,decaysperStop,mom_low,mom_high);
 			if (TMath::Finite(results.N_DIO_expected)<1) continue;
-
-//			cout << "results.N_DIO_expected_error = " << results.N_DIO_expected_error << endl;
 
 			calc_N_RPC_expected(results.N_RPCs_expected, results.N_RPCs_expected_error, mom_low,mom_high);
 			if (TMath::Finite(results.N_RPCs_expected)<1) continue;
 
-//			cout << "results.N_RPCs_expected = " << results.N_RPCs_expected << endl;
-
-//			results.Nsig_UL=return_FeldmanCousins_sensitivity(results.N_DIO_expected);
 			results.Nsig_UL=return_FeldmanCousins_sensitivity(results.N_DIO_expected + results.N_RPCs_expected);
 			if (TMath::Finite(results.Nsig_UL)<1) continue;
-
-//			cout << "results.Nsig_UL = " << results.Nsig_UL << endl;
 
 			// calculate error on Nsig_UL by calculation of the Feldman-Cousins sensitivity of N_DIO_expected - 1*sigma and N_DIO_expected + 1*sigma, take maximum of both values
 			results.Nsig_UL_error = 999;
             if (results.Nsig_UL != 999) {
 
-//            	std::cout << "return_FeldmanCousins_sensitivity(results.N_DIO_expected + results.N_DIO_expected_error) == " << return_FeldmanCousins_sensitivity(results.N_DIO_expected + results.N_DIO_expected_error) << std::endl;
-//            	std::cout << "return_FeldmanCousins_sensitivity(results.N_DIO_expected - results.N_DIO_expected_error) == " << return_FeldmanCousins_sensitivity(results.N_DIO_expected - results.N_DIO_expected_error) << std::endl;
-
             	double temp_Nsig_UL_error_lower = results.Nsig_UL - return_FeldmanCousins_sensitivity(results.N_DIO_expected - results.N_DIO_expected_error);
             	double temp_Nsig_UL_error_upper = return_FeldmanCousins_sensitivity(results.N_DIO_expected + results.N_DIO_expected_error) - results.Nsig_UL;
 
-//            	std::cout << "temp_Nsig_UL_error_lower == " << temp_Nsig_UL_error_lower << std::endl;
-//            	std::cout << "temp_Nsig_UL_error_upper == " << temp_Nsig_UL_error_upper << std::endl;
-
             	results.Nsig_UL_error = max(temp_Nsig_UL_error_lower, temp_Nsig_UL_error_upper); // take maximum of errors to avoid asymmetric errors on Nsig_UL
             }
-
-//			cout << "results.Nsig_UL_error = " << results.Nsig_UL_error << endl;
 
 			results.BF_UL=calc_BF_upper_limit(results.Nsig_UL,POT,stopsperPOT,capturesperStop,results.efficiency_CE);
 			if (TMath::Finite(results.BF_UL)<1) continue;
 			if (results.BF_UL==0) continue;
 
-//			cout << "results.BF_UL = " << results.BF_UL << endl;
 
 			results.BF_UL_error=calc_BF_upper_limit_error(results.Nsig_UL,results.Nsig_UL_error,POT,stopsperPOT,capturesperStop,results.efficiency_CE,results.efficiency_error_CE);
 			if (TMath::Finite(results.BF_UL_error)<1) continue;
 			if (results.BF_UL_error==0) continue;
-
-//			cout << "results.momentum_low  = " << results.momentum_low << endl;
-//			cout << "results.momentum_high = " << results.momentum_high << endl;
-//			cout << "results.N_CE_gen = " << results.N_CE_gen << endl;
-//			cout << "results.N_CE_rec = " << results.N_CE_rec << endl;
-//			cout << "results.efficiency_CE = " << results.efficiency_CE << endl;
-//			cout << "results.N_CE_expected = " << results.N_CE_expected << endl;
-//			cout << "results.SES = " << results.SES << endl;
-//			cout << "results.N_DIO_gen = " << results.N_DIO_gen << endl;
-//			cout << "results.N_DIO_rec = " << results.N_DIO_rec << endl;
-//			cout << "results.efficiency_DIO = " << results.efficiency_DIO << endl;
-//			cout << "results.N_DIO_expected = " << results.N_DIO_expected << endl;
-//			cout << "results.Nsig_UL = " << results.Nsig_UL << endl;
-//			cout << "results.BF_UL = " << results.BF_UL << endl;
 
 			results.optimal_window=0; // set optimal window flag to 0, set flag to 1 for optimal window entry later
 

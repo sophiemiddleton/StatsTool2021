@@ -9,6 +9,7 @@ import argparse
 from optparse import OptionParser
 import matplotlib.pyplot as plt
 from ImportData import ImportData
+import Histograms
 #import StatsFunctions
 
 def plot1DHist(file_name, tree_name, branch_name, feature_name):
@@ -36,10 +37,8 @@ def main(options, args):
 
     DIO_gen_momx = data.GetFeature( "DIO", "demcgen.momx")
     CE_gen_momx = data.GetFeature( "CE", "demcgen.momx")
-
     DIO_gen_momy_mom = data.GetFeature( "DIO", "demcgen.momy")
     CE_gen_momy = data.GetFeature( "CE", "demcgen.momy")
-
     DIO_gen_momz = data.GetFeature( "DIO", "demcgen.momz")
     CE_gen_momz = data.GetFeature( "CE", "demcgen.momz")
 
