@@ -4,7 +4,9 @@
 
 import sys
 import math
+import ROOT
 from ROOT import TMath, TH1F
+import Histograms
 
 class StatsFunctions :
 
@@ -462,19 +464,19 @@ class StatsFunctions :
         bin_high = TMath.Nint((mom_high - self.momentum_lower_limit) / self.momentum_Bin_width) + 1
         return histo.Integral(bin_low,bin_high)
 
-    def double calc_Nrec(self, histo, mom_low, mom_high): #TODO: Add a process code here
-        double Nrec = return_histogram_integral(histo, mom_low, mom_high)
+    def calc_Nrec(self, histo, mom_low, mom_high): #TODO: Add a process code here
+        Nrec = return_histogram_integral(histo, mom_low, mom_high)
         if (abs(mom_low - 103.5) < 0.01 and abs(mom_high - 105.5) < 0.01):#TODO remove hardcoding
             print("Nrec = ", Nrec)
         return Nrec
 
-    def double calc_Nrec_error(self, histo, mom_low,  mom_high):
+    def calc_Nrec_error(self, histo, mom_low,  mom_high):
         Nrec_error = 0
-    	# compute error from sum of weigths in the bins
-    	# translate mom_low and mom_up in bin numbers
-    	bin_low = TMath.Nint((mom_low - self.momentum_lower_limit) / self.momentum_Bin_width) + 1
-    	int bin_high = TMath.Nint((mom_high - self.momentum_lower_limit) / self.momentum_Bin_width) + 1
-    	temp_error_sum = 0
+        # compute error from sum of weigths in the bins
+        # translate mom_low and mom_up in bin numbers
+        bin_low = TMath.Nint((mom_low - self.momentum_lower_limit) / self.momentum_Bin_width)+1
+        int bin_high = TMath.Nint((mom_high - self.momentum_lower_limit) / self.momentum_Bin_width)+1
+        temp_error_sum = 0
     	for i in range(bin_low, bin_high):
     		temp_error_sum += pow(histo.GetBinError(i), 2)
     	Nrec_error = math.sqrt(temp_error_sum)
@@ -489,7 +491,6 @@ class StatsFunctions :
         use Glen Cowan derivation of efficiency error based on a binomial distribution
         http://www.pp.rhul.ac.uk/~cowan/stat/notes/efferr.pdf
         """
-
     	efficiency_error = math.sqrt(Nrec * (1. - Nrec/Ngen)) / Ngen
         return efficiency_error
 
@@ -504,3 +505,47 @@ class StatsFunctions :
         # calculate error of single event sensitivity (SES), corresponds to uncertainting on branching fraction where 1 signal event is observed
     	double SES = 1. / ( POT * stopsperPOT * capturesperStop * pow(efficiency_CE, 2) ) * efficiency_error_CE # error propagation on SES calculation
         return SES
+
+    def calc_N_DIO_expected(self, N_DIO_rec, N_DIO_gen, POT, stopsperPOT, decaysperStop, mom_low, mom_high):
+        G_number_DIOs_represented = _diocz_f.Integral(mom_low,mom_high);
+        N_DIO_expected = N_DIO_rec * G_number_DIOs_represented * POT * stopsperPOT * decaysperStop / N_DIO_gen;
+
+        if (abs(mom_low-self.signal_start) < 0.01 and abs(mom_high-self.signal_end) < 0.01):
+            print( "===========================================================================")
+            print( "calc_N_DIO_expected(double N_DIO_rec, double N_DIO_gen, double POT, double stopsperPOT, double decaysperStop, double mom_low, double mom_high):")
+            print( "N_DIO_rec = " , N_DIO_rec )
+            print( "N_DIO_gen = " , N_DIO_gen )
+            print( "POT = " , POT )
+            print( "stopsperPOT = " , stopsperPOT)
+            print( "decaysperStop = " , decaysperStop )
+            print( "G_number_DIOs_represented = " , G_number_DIOs_represented )
+            print( "N_DIO_expected = " , N_DIO_expected )
+
+        return N_DIO_expected
+
+    def calc_N_DIO_expected_error(self, efficiency_error_DIO, POT, stopsperPOT, decaysperStop, mom_low, mom_high):
+    	G_number_DIOs_represented = _diocz_f.Integral(mom_low,mom_high);
+        N_DIO_expected_error = G_number_DIOs_represented * POT * stopsperPOT * decaysperStop * efficiency_error_DIO # compute error on N_DIO_expected from error on the efficiency
+    	if (abs(mom_low-self.signal_start)<0.01 and abs(mom_high-self.signal_end)<0.01):
+    		print("===========================================================================")
+    		print("calc_N_DIO_expected(double N_DIO_rec, double N_DIO_gen, double POT, double stopsperPOT,double decaysperStop, double mom_low, double mom_high):" )
+    		print("POT = ", POT , endl)
+    		print( "stopsperPOT = " , stopsperPOT)
+    		print( "decaysperStop = ", decaysperStop)
+    		print( "G_number_DIOs_represented = ", G_number_DIOs_represented)
+    		print( "N_DIO_expected_error = " , N_DIO_expected_error)
+    	return N_DIO_expected_error;
+
+    def calc_N_RPC_expected(self, integral_RPCs, integral_RPCs_error, mom_low, mom_high): #TODO - add in same functionality as RPC
+    	integral_RPCs_error = 0
+    	integral_RPCs = histo_RPCs.IntegralAndError( histo_RPCs.FindBin(mom_low), histo_RPCs.FindBin(mom_high), integral_RPCs_error )
+        return integral_RPCs
+
+    def calc_BF_upper_limit(self, Nsig_UL, POT, stopsperPOT, capturesperStop, efficiency_CE):
+    	double BF_upper_limit = Nsig_UL / ( POT * stopsperPOT * capturesperStop * efficiency_CE )
+        return BF_upper_limit
+
+    def calc_BF_upper_limit_error(self, Nsig_UL, Nsig_UL_error, POT, stopsperPOT, capturesperStop, efficiency_CE, efficiency_error_CE):
+    	BF_upper_limit_error = 1. / (POT * stopsperPOT * capturesperStop) * math.sqrt(pow(Nsig_UL_error/efficiency_CE, 2)
+        + pow(Nsig_UL * efficiency_error_CE/(efficiency_CE*efficiency_CE), 2))
+        return BF_upper_limit_error;
