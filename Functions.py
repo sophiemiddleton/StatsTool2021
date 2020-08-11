@@ -5,7 +5,7 @@
 import sys
 import math
 import ROOT
-from ROOT import TMath
+from ROOT import TMath, TH1F
 from Histograms import Histograms
 from Results import Results
 
@@ -437,7 +437,7 @@ class StatsFunctions :
     Function to return upper limit sensitivity for corresponding background estimate
     using Feldman-Cousins at 90%CL
     """
-    def return_FeldmanCousins_sensitivity(self, background_mean):
+    def GetFeldmanCousinsSensitivity(self, background_mean):
         if (background_mean < 10): # have only values up to 10 background events in table, will not work for wide DIO spectrum
                 nb        = 2001
                 bInterval = 0.005
@@ -477,13 +477,13 @@ class YieldFunctions:
             bin_high = TMath.Nint((mom_high - self.momentum_lower_limit) / self.momentum_Bin_width) + 1
             return histo.Integral(bin_low,bin_high)
 
-        def GetNReco(self, histo, mom_low, mom_high, process):
-            Nrec = GetIntegral(histo, mom_low, mom_high)
+        def GetNReco(self, histo, mom_low, mom_high):
+            Nrec = self.GetIntegral(histo, mom_low, mom_high)
             if (abs(mom_low - 103.5) < 0.01 and abs(mom_high - 105.5) < 0.01):#TODO remove hardcoding
                 print("Nrec = ", Nrec)
             return Nrec
 
-        def GetNRecoError(self, histo, mom_low,  mom_high, process):
+        def GetNRecoError(self, histo, mom_low,  mom_high):
             Nrec_error = 0
             # compute error from sum of weigths in the bins
             # translate mom_low and mom_up in bin numbers
@@ -568,6 +568,7 @@ class YieldFunctions:
         def FillResults(self):
             mom_low=self.momentum_lower_limit
             stats = StatsFunctions()
+            Ngen_CE = self.Histos.histo_CE_generated.GetEntries()
             while( mom_low < self.momentum_upper_limit):
                 mom_high=mom_low+0.05
                 while(mom_high < self.momentum_upper_limit):
@@ -585,7 +586,7 @@ class YieldFunctions:
                     if (self.isfinite(result.N_CE_gen)<1):
                         continue
 
-                    result.N_CE_rec = self.GetNReco(histo_CE_reconstructed,mom_low,mom_high)
+                    result.N_CE_rec = self.GetNReco(self.Histos.histo_CE_reconstructed,mom_low,mom_high)
                     if (self.isfinite(result.N_CE_rec)<1):
                         continue
 
@@ -597,41 +598,41 @@ class YieldFunctions:
                     if (self.isfinite(result.efficiency_error_CE)<1):
                         continue
 
-                    result.N_CE_expected = self.GetSignalExpectedYield(POT,stopsperPOT,capturesperStop,result.efficiency_CE);
+                    result.N_CE_expected = self.GetSignalExpectedYield(POT,self.stopsperPOT,self.capturesperStop,result.efficiency_CE)
                     if (self.isfinite(result.N_CE_expected)<1):
                         continue
                     if (result.N_CE_expected==0):
                         continue
 
-                    result.N_CE_expected_error = self.GetSignalExpectedYield(POT,stopsperPOT,capturesperStop,result.efficiency_error_CE);
+                    result.N_CE_expected_error = self.GetSignalExpectedYield(self.POT,self.stopsperPOT,self.capturesperStop,result.efficiency_error_CE)
                     if (self.isfinite(result.N_CE_expected_error)<1):
                         continue
                     if (result.N_CE_expected_error==0):
                         continue
 
-                    result.SES = self.GetSES(POT,stopsperPOT,capturesperStop,result.efficiency_CE)
+                    result.SES = self.GetSES(self.POT,self.stopsperPOT,self.capturesperStop,result.efficiency_CE)
                     if (self.isfinite(result.SES)<1):
                         continue
 
-                    result.SES_error = self.GetSESError(POT,stopsperPOT,capturesperStop,result.efficiency_CE,result.efficiency_error_CE)
+                    result.SES_error = self.GetSESError(self.POT,self.stopsperPOT,self.capturesperStop,result.efficiency_CE,result.efficiency_error_CE)
                     if (self.isfinite(result.SES_error)<1):
                         continue
 
-                    result.N_DIO_gen = self.GetNReco(histo_DIO_generated_reweighted, mom_low,mom_high); # use same function as for reconstructed DIOs to integrate histograms
+                    result.N_DIO_gen = self.GetNReco(self.Histos.histo_DIO_generated_reweighted, mom_low,mom_high); # use same function as for reconstructed DIOs to integrate histograms
                     if (self.isfinite(result.N_DIO_gen)<1):
                         continue
 
                     print("Results.N_DIO_gen = ",result.N_DIO_gen)
 
-                    result.N_DIO_gen_erro = self.GetNRecoError(histo_DIO_generated_reweighted, mom_low,mom_high)
+                    result.N_DIO_gen_erro = self.GetNRecoError(self.Histos.histo_DIO_generated_reweighted, mom_low,mom_high)
                     if (self.isfinite(result.N_DIO_gen_error)<1):
                         continue
-                    result.N_DIO_rec = self.GetNReco(histo_DIO_reconstructed_reweighted,mom_low,mom_high)
+                    result.N_DIO_rec = self.GetNReco(self.Histos.histo_DIO_reconstructed_reweighted,mom_low,mom_high)
                     if (self.isfinite(result.N_DIO_rec)<1):
                         continue
                     print("Result.N_DIO_rec = ",result.N_DIO_rec)
 
-                    result.N_DIO_rec_error = self.GetNRecoError(histo_DIO_reconstructed_reweighted,mom_low,mom_high)
+                    result.N_DIO_rec_error = self.GetNRecoError(self.Histos.histo_DIO_reconstructed_reweighted,mom_low,mom_high)
                     if (self.isfinite(result.N_DIO_rec_error)<1):
                         continue
 
@@ -651,7 +652,7 @@ class YieldFunctions:
                     if (self.isfinite(result.N_RPCs_expected)<1):
                         continue
 
-                    result.Nsig_UL = stats.return_FeldmanCousins_sensitivity(result.N_DIO_expected + result.N_RPCs_expected)
+                    result.Nsig_UL = stats.GetFeldmanCousinsSensitivity(result.N_DIO_expected + result.N_RPCs_expected)
                     if (self.isfinite(result.Nsig_UL)<1):
                         continue
 
@@ -659,8 +660,8 @@ class YieldFunctions:
                     result.Nsig_UL_error = 999
                     if (result.Nsig_UL != 999):
 
-                        temp_Nsig_UL_error_lower = result.Nsig_UL - stats.return_FeldmanCousins_sensitivity(result.N_DIO_expected - result.N_DIO_expected_error)
-                        temp_Nsig_UL_error_upper = stats.return_FeldmanCousins_sensitivity(result.N_DIO_expected + result.N_DIO_expected_error) - result.Nsig_UL
+                        temp_Nsig_UL_error_lower = result.Nsig_UL - stats.GetFeldmanCousinsSensitivity(result.N_DIO_expected - result.N_DIO_expected_error)
+                        temp_Nsig_UL_error_upper = stats.GetFeldmanCousinsSensitivity(result.N_DIO_expected + result.N_DIO_expected_error) - result.Nsig_UL
 
                         result.Nsig_UL_error = max(temp_Nsig_UL_error_lower, temp_Nsig_UL_error_upper) # take maximum of errors to avoid asymmetric errors on Nsig_UL
 
