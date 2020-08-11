@@ -6,11 +6,12 @@
 import uproot
 import sys
 import argparse
+import math
 from optparse import OptionParser
 import matplotlib.pyplot as plt
 from ImportData import ImportData
-import Histograms
-#import StatsFunctions
+from Histograms import Histograms
+import StatsFunctions
 
 def plot1DHist(file_name, tree_name, branch_name, feature_name):
     """ Basic funciton to make a plot of a feature """
@@ -32,18 +33,19 @@ def plot1DHist(file_name, tree_name, branch_name, feature_name):
 def main(options, args):
     print("Importing Data from: ", options.CE, " and", options.DIO)
     data = ImportData(options.CE, options.DIO)
+    histos = Histograms(400, 90., 110.)
+
     DIO_reco_mom = data.GetFeature( "DIO", "deent.mom")
     CE_reco_mom = data.GetFeature( "CE", "deent.mom")
+    histos.FillHistogram(histos.histo_CE_reconstructed , CE_reco_mom)
+    histos.FillHistogram(histos.histo_DIO_reconstructed_flat , DIO_reco_mom)
 
-    DIO_gen_momx = data.GetFeature( "DIO", "demcgen.momx")
-    CE_gen_momx = data.GetFeature( "CE", "demcgen.momx")
-    DIO_gen_momy_mom = data.GetFeature( "DIO", "demcgen.momy")
-    CE_gen_momy = data.GetFeature( "CE", "demcgen.momy")
-    DIO_gen_momz = data.GetFeature( "DIO", "demcgen.momz")
-    CE_gen_momz = data.GetFeature( "CE", "demcgen.momz")
+    DIO_gen_momTot = data.GetMagFeature("DIO", "demcgen.momx", "demcgen.momx", "demcgen.momx")
+    CE_gen_momTot = data.GetMagFeature("CE", "demcgen.momx", "demcgen.momx", "demcgen.momx")
+    histos.FillHistogram(histos.histo_CE_generated , CE_gen_momTot)
+    histos.FillHistogram(histos.histo_DIO_generated_flat , DIO_gen_momTot)
 
-    DIO_gen_momTot = math.sqrt(DIO_gen_momx*DIO_gen_momx + DIO_gen_momy*DIO_gen_momy + DIO_gen_momz*DIO_gen_momz)
-    CE_gen_momTot = math.sqrt(CE_gen_momx*CE_gen_momx + CE_gen_momy*CE_gen_momy + CE_gen_momz*CE_gen_momz)
+    stats = StatsFunctions(histos)
     #plot1DHist(options.CE, "TrkAnaNeg", "trkana", "deent.mom")
 
 if __name__ == "__main__":

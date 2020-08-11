@@ -5,7 +5,7 @@
 import sys
 import math
 import ROOT
-from ROOT import TMath, TH1F
+from ROOT import TMath, TH1
 import Histograms
 
 class StatsFunctions :
@@ -23,6 +23,10 @@ class StatsFunctions :
         self.capturesperStop = 0.609
         self.decaysperStop = 0.391
         self.Histos = histos
+        self._diocz_f = TF1("_diocz_f",DIOCZ,momentum_lower_limit,momentum_upper_limit,1)
+        self._diocz_f.SetLineColor(kGreen)
+        self._diocz_f.SetParameter(0,1.0)
+
         '''
         Feldman-Cousins experimental sensitivities (defined as the average upper limit
         that would be obtained by an ensemble of experiments with the expected background

@@ -5,6 +5,7 @@
 import sys
 import uproot
 import pandas
+import math
 
 class ImportData :
 
@@ -40,6 +41,24 @@ class ImportData :
         df = input_tree.pandas.df(flatten=flatten)
         print(process, feature, df[feature])
         return df[feature]
+
+    def GetMagFeature(self, process, feature_x, feature_y, feature_z, flatten=False ):
+        """ Open Root File and Extract field and find a magnitude """
+        filename = ""
+        if process == "CE":
+            filename = self.CEFileName
+        if process == "DIO":
+            filename = self.DIOFileName
+        input_file = uproot.open(filename)
+        input_tree = input_file[self.TreeName][self.BranchName]
+        df = input_tree.pandas.df(flatten=flatten)
+        df_tot = []
+        for i, j in enumerate(df[feature_x]):
+            fx = j
+            fy = df[feature_y][i]
+            fz = df[feature_z][i]
+            df_tot.append(math.sqrt(fx*fx+fy*fy+fz*fz))
+        return df_tot
 
     #TODO: Devloping this:
     def ExportDataToCSV(self, filename, flatten = False):
