@@ -1,6 +1,6 @@
 # StatsTool2021
 
-This code was developed by S. Middleton, based on the CalTool framework developed by M. Rohrken.
+This code was developed by S. Middleton, originally based on the CalTool framework developed by M. Rohrken.
 
 The purpose of this code is for the optimization of the Mu2e-II Stopping Target.
 
