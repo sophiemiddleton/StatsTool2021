@@ -39,7 +39,6 @@ class ImportData :
         input_file = uproot.open(filename)
         input_tree = input_file[self.TreeName][self.BranchName]
         df = input_tree.pandas.df(flatten=flatten)
-        print(process, feature, df[feature])
         return df[feature]
 
     def GetMagFeature(self, process, feature_x, feature_y, feature_z, flatten=False ):

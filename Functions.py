@@ -7,6 +7,7 @@ import math
 import ROOT
 from ROOT import TMath
 from Histograms import Histograms
+from Results import Results
 
 class StatsFunctions :
 
@@ -572,86 +573,86 @@ class YieldFunctions:
                 while(mom_high < self.momentum_upper_limit):
                     #perform calculations, check results for reasanable values and for infinity or NaN, save results
                     result = Results()
-                    self.Results.momentum_low = mom_low
-                    if (isfinite(result.momentum_low)<1):
+                    result.momentum_low = mom_low
+                    if (self.isfinite(result.momentum_low)<1):
                         continue
 
                     result.momentum_high=mom_high
-                    if (isfinite(result.momentum_high)<1):
+                    if (self.isfinite(result.momentum_high)<1):
                         continue
 
                     result.N_CE_gen=Ngen_CE #TODO
-                    if (isfinite(result.N_CE_gen)<1):
+                    if (self.isfinite(result.N_CE_gen)<1):
                         continue
 
                     result.N_CE_rec = self.GetNReco(histo_CE_reconstructed,mom_low,mom_high)
-                    if (isfinite(result.N_CE_rec)<1):
+                    if (self.isfinite(result.N_CE_rec)<1):
                         continue
 
                     result.efficiency_CE = self.GetRecoEff(result.N_CE_rec,result.N_CE_gen)
-                    if (isfinite(result.efficiency_CE)<1):
+                    if (self.isfinite(result.efficiency_CE)<1):
                          continue
 
                     result.efficiency_error_CE = self.GetRecoEffError(result.N_CE_rec,result.N_CE_gen)
-                    if (isfinite(result.efficiency_error_CE)<1):
+                    if (self.isfinite(result.efficiency_error_CE)<1):
                         continue
 
                     result.N_CE_expected = self.GetSignalExpectedYield(POT,stopsperPOT,capturesperStop,result.efficiency_CE);
-                    if (isfinite(result.N_CE_expected)<1):
+                    if (self.isfinite(result.N_CE_expected)<1):
                         continue
                     if (result.N_CE_expected==0):
                         continue
 
                     result.N_CE_expected_error = self.GetSignalExpectedYield(POT,stopsperPOT,capturesperStop,result.efficiency_error_CE);
-                    if (isfinite(result.N_CE_expected_error)<1):
+                    if (self.isfinite(result.N_CE_expected_error)<1):
                         continue
                     if (result.N_CE_expected_error==0):
                         continue
 
                     result.SES = self.GetSES(POT,stopsperPOT,capturesperStop,result.efficiency_CE)
-                    if (isfinite(result.SES)<1):
+                    if (self.isfinite(result.SES)<1):
                         continue
 
                     result.SES_error = self.GetSESError(POT,stopsperPOT,capturesperStop,result.efficiency_CE,result.efficiency_error_CE)
-                    if (isfinite(result.SES_error)<1):
+                    if (self.isfinite(result.SES_error)<1):
                         continue
 
                     result.N_DIO_gen = self.GetNReco(histo_DIO_generated_reweighted, mom_low,mom_high); # use same function as for reconstructed DIOs to integrate histograms
-                    if (isfinite(result.N_DIO_gen)<1):
+                    if (self.isfinite(result.N_DIO_gen)<1):
                         continue
 
                     print("Results.N_DIO_gen = ",result.N_DIO_gen)
 
                     result.N_DIO_gen_erro = self.GetNRecoError(histo_DIO_generated_reweighted, mom_low,mom_high)
-                    if (isfinite(result.N_DIO_gen_error)<1):
+                    if (self.isfinite(result.N_DIO_gen_error)<1):
                         continue
                     result.N_DIO_rec = self.GetNReco(histo_DIO_reconstructed_reweighted,mom_low,mom_high)
-                    if (isfinite(result.N_DIO_rec)<1):
+                    if (self.isfinite(result.N_DIO_rec)<1):
                         continue
                     print("Result.N_DIO_rec = ",result.N_DIO_rec)
 
                     result.N_DIO_rec_error = self.GetNRecoError(histo_DIO_reconstructed_reweighted,mom_low,mom_high)
-                    if (isfinite(result.N_DIO_rec_error)<1):
+                    if (self.isfinite(result.N_DIO_rec_error)<1):
                         continue
 
                     result.efficiency_DIO = self.GetRecoEff(result.N_DIO_rec,result.N_DIO_gen)
-                    if (isfinite(result.efficiency_DIO)<1):
+                    if (self.isfinite(result.efficiency_DIO)<1):
                         continue
 
                     result.efficiency_error_DIO = self.GetDIOEffError(result.N_DIO_rec, result.N_DIO_rec_error, result.N_DIO_gen, result.N_DIO_gen_error);
-                    if (isfinite(result.efficiency_error_DIO)<1):
+                    if (self.isfinite(result.efficiency_error_DIO)<1):
                         continue
 
                     result.N_DIO_expected, result.N_DIO_expected_erro = self.GetDIOExpectedYield(result.N_DIO_rec,result.N_DIO_gen,POT,stopsperPOT,decaysperStop,mom_low,mom_high);
-                    if (isfinite(result.N_DIO_expected)<1):
+                    if (self.isfinite(result.N_DIO_expected)<1):
                         continue
 
                     self.GetRPCExpectedYield(result.N_RPCs_expected, result.N_RPCs_expected_error, mom_low, mom_high)
-                    if (isfinite(result.N_RPCs_expected)<1):
+                    if (self.isfinite(result.N_RPCs_expected)<1):
                         continue
 
                     result.Nsig_UL = stats.return_FeldmanCousins_sensitivity(result.N_DIO_expected + result.N_RPCs_expected)
-                    if (isfinite(result.Nsig_UL)<1):
+                    if (self.isfinite(result.Nsig_UL)<1):
                         continue
 
                     # calculate error on Nsig_UL by calculation of the Feldman-Cousins sensitivity of N_DIO_expected - 1*sigma and N_DIO_expected + 1*sigma, take maximum of both values
@@ -664,13 +665,13 @@ class YieldFunctions:
                         result.Nsig_UL_error = max(temp_Nsig_UL_error_lower, temp_Nsig_UL_error_upper) # take maximum of errors to avoid asymmetric errors on Nsig_UL
 
                     result.BF_UL = self.GetBFUL(result.Nsig_UL,POT,stopsperPOT,capturesperStop,result.efficiency_CE);
-                    if (isfinite(result.BF_UL)<1):
+                    if (self.isfinite(result.BF_UL)<1):
                         continue
                     if (result.BF_UL==0):
                         continue
 
                     result.BF_UL_error = self.GetBFULError(results.Nsig_UL,results.Nsig_UL_error,POT,stopsperPOT,capturesperStop,results.efficiency_CE,results.efficiency_error_CE);
-                    if (isfinite(result.BF_UL_error)<1):
+                    if (self.isfinite(result.BF_UL_error)<1):
                         continue
                     if (result.BF_UL_error==0):
                         continue
@@ -680,3 +681,16 @@ class YieldFunctions:
                     self.Results.append(result)
                     mom_high+=momentum_Bin_width
                 mom_low+=momentum_Bin_width
+            self.Result.PrintResults()
+            # iterate over results_vector and find the optimal window with respect to the 90% Feldman-Cousins BF upper limit
+            temp_index = -1
+            temp_BF_UL = 999
+            for i, j in enumerate(results):
+                if (self.Results[i].BF_UL < temp_BF_UL ):
+                    temp_index = i
+                    temp_BF_UL = self.Results[i].BF_UL
+
+            self.Results[temp_index].optimal_window=1 # set flag to 1 for the entry with the optimal window
+
+        def WriteHistograms(self):
+            """function to make TTree"""
