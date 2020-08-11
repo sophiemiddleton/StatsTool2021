@@ -15,13 +15,13 @@ class DIO :
     for E>85 MeV
     """
     def DIOCcz(self, x, par):
-        double ee = x[0];
-        double norm = par[0];
+        ee = x[0];
+        norm = par[0];
         mal = 25133
         mmu = 105.654
         emu = 105.194
         emue = 104.973
-        double me = 0.511
+        me = 0.511
         a5 = 8.6434e-17
         a6 = 1.16874e-17
         a7 = -1.87828e-19
@@ -31,3 +31,8 @@ class DIO :
             return norm*(a5*pow(delta,5) + a6*pow(delta,6) + a7*pow(delta,7) + a8*pow(delta,8));
         else:
             return 0.0
+
+    def DoDIOWeights(self, fit_mom_DIO_generated, hist_flat, hist_reweighted):
+        dio_weight =  DIOCcz(fit_mom_DIO_generated)
+        histo_flat.Fill(fit_mom_DIO_generated)
+        histo_reweighted.Fill(fit_mom_DIO_generated, dio_weight / 7.91001e-10 );

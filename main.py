@@ -11,7 +11,8 @@ from optparse import OptionParser
 import matplotlib.pyplot as plt
 from ImportData import ImportData
 from Histograms import Histograms
-import StatsFunctions
+from Functions import *
+from Results import Results
 
 def plot1DHist(file_name, tree_name, branch_name, feature_name):
     """ Basic funciton to make a plot of a feature """
@@ -45,7 +46,8 @@ def main(options, args):
     histos.FillHistogram(histos.histo_CE_generated , CE_gen_momTot)
     histos.FillHistogram(histos.histo_DIO_generated_flat , DIO_gen_momTot)
 
-    stats = StatsFunctions(histos)
+    stats = StatsFunctions()
+    yields = YieldFunctions(histos)
     #plot1DHist(options.CE, "TrkAnaNeg", "trkana", "deent.mom")
 
 if __name__ == "__main__":
