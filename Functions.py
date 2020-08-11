@@ -5,10 +5,8 @@
 import sys
 import math
 import ROOT
-from ROOT import TMath, TH1
+from ROOT import TMath
 from Histograms import Histograms
-from DIO import DIO
-
 
 class StatsFunctions :
 
@@ -455,7 +453,7 @@ class StatsFunctions :
             return 999
 
 
-    class YieldFunctions:
+class YieldFunctions:
 
         def __init__(self,histos):
             self.momentum_lower_limit = 90.
@@ -470,12 +468,7 @@ class StatsFunctions :
             self.decaysperStop = 0.391
             self.Histos = histos
             self.Results = []
-            # Fill DIO Functions:
-            DIO = DIO()
-            self._diocz_f = TF1("_diocz_f",DIO.DIOCZ,momentum_lower_limit,momentum_upper_limit,1)
-            self._diocz_f.SetLineColor(kGreen)
-            self._diocz_f.SetParameter(0,1.0)
-            dio_weight =  calculate_DIOweight(fit_mom_DIO_generated)
+
 
         def GetIntegral(self, histo, mom_low, mom_high):
             # Translate mom_low and mom_up in bin numbers
@@ -536,7 +529,7 @@ class StatsFunctions :
             return SES
 
         def GetDIOExpectedYield(self, N_DIO_rec, N_DIO_gen, POT, stopsperPOT, decaysperStop, mom_low, mom_high):
-            G_number_DIOs_represented = self._diocz_f.Integral(mom_low,mom_high);
+            G_number_DIOs_represented = Histos._diocz_f.Integral(mom_low,mom_high);
             N_DIO_expected = N_DIO_rec * G_number_DIOs_represented * POT * stopsperPOT * decaysperStop / N_DIO_gen;
             N_DIO_expected_error = G_number_DIOs_represented * POT * stopsperPOT * decaysperStop * efficiency_error_DIO # compute error on N_DIO_expected from error on the efficiency
             if (abs(mom_low-self.signal_start) < 0.01 and abs(mom_high-self.signal_end) < 0.01):

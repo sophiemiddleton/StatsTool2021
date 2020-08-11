@@ -31,8 +31,3 @@ class DIO :
             return norm*(a5*pow(delta,5) + a6*pow(delta,6) + a7*pow(delta,7) + a8*pow(delta,8));
         else:
             return 0.0
-
-    def DoDIOWeights(self, fit_mom_DIO_generated, hist_flat, hist_reweighted):
-        dio_weight =  DIOCcz(fit_mom_DIO_generated)
-        histo_flat.Fill(fit_mom_DIO_generated)
-        histo_reweighted.Fill(fit_mom_DIO_generated, dio_weight / 7.91001e-10 );

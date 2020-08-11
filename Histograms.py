@@ -4,6 +4,7 @@
 
 import sys
 import ROOT
+from DIO import DIO
 from ROOT import TMath, TF1, TH1F
 
 class Histograms :
@@ -31,7 +32,24 @@ class Histograms :
 
         self.histo_RPC_reconstructed.Scale(target_mass_scalefactor)
 
+        self.DIO = DIO()
+        self._diocz_f = TF1("_diocz_f",DIO.DIOCZ,momentum_lower_limit,momentum_upper_limit,1)
+        self._diocz_f.SetLineColor(kGreen)
+        self._diocz_f.SetParameter(0,1.0)
+
     def FillHistogram(self, histogram, data):
         for i, j in enumerate(data):
             histogram.Fill(j)
         return histogram
+
+    def DoDIOWeightsReco(self, data):
+        for i, j in enumerate(data):
+            dio_weight =  DIOCcz(j)
+            self.histo_DIO_reconstructed_flat.Fill(j)
+            self.histo_DIO_reconstructed_reweighted.Fill(j, dio_weight / 7.91001e-10 )
+
+    def DoDIOWeightsGen(self, data):
+        for i, j in enumerate(data):
+            dio_weight =  DIOCcz(j)
+            self.histo_DIO_generated_flat.Fill(j)
+            self.histo_DIO_generated_reweighted.Fill(j, dio_weight / 7.91001e-10 )
