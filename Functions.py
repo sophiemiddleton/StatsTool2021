@@ -5,9 +5,10 @@
 import sys
 import math
 import ROOT
-from ROOT import TMath, TH1F
+from ROOT import TMath, TH1F, TF1
 from Histograms import Histograms
 from Results import Results
+from DIO import DIO
 
 class StatsFunctions :
 
@@ -460,21 +461,70 @@ class YieldFunctions:
             self.momentum_lower_limit = 90.
             self.momentum_upper_limit = 110.
             self.nBins = 400
-            self.nBin_steps = (self.momentum_upper_limit-self.momentum_lower_limit)/self.nBins
             self.momentum_Bin_width = 0.05
             self.signal_start = 103.75
             self.signal_end = 105.45
             self.POT = 3.6e20
             self.capturesperStop = 0.609
             self.decaysperStop = 0.391
+            self.muonstopsperPOT = 0.00159 #94206/1e8
+            #RPC:
+            self.pionstopsperPOT = 205856/1e8
+            self.psurv = 1.
+            self.frpc = 0.0215
+            self.rhoRPC = 0.0069
             self.Histos = histos
             self.Results = []
+            self.DIO = DIO()
+            self._diocz_f = TF1("_diocz_f",DIO.DIOcz(par[0]), 90,110.,1)
+            self._diocz_f.SetParameter(0,1.0)
 
+        def MomLowLimit(self):
+            return self.momentum_lower_limit
+
+        def MomHighLimit(self):
+            return self.momentum_upper_limit
+
+        def NBins(self):
+            return self.nBins
+
+        def NBinsSetps(self):
+            return (self.MomHighLimit()-self.MomLowLimit())/self.NBins()
+
+        def MomBinWidth(self):
+            return self.momentum_Bin_width
+
+        def SignalRegionStart(self):
+            return self.signal_start
+
+        def SignalRegionEnd(self):
+            return self.signal_end
+
+        def GetPOT(self):
+            return self.POT
+
+        def CapturesPerStop(self):
+            return self.capturesperStop
+
+        def DecaysPerStop(self):
+            return self.decaysperStop
+
+        def MuonStopsPerPOT(self):
+            return self.muonstopsperPOT
+
+        def PionStopsPerPOT(self):
+            return self.pionstopsperPOT
+
+        def RhoIntRPC(self):
+            return self.frpc
+
+        def RPCBF(self):
+            return self.rhoRPC
 
         def GetIntegral(self, histo, mom_low, mom_high):
             # Translate mom_low and mom_up in bin numbers
-            bin_low = TMath.Nint((mom_low - self.momentum_lower_limit) / self.momentum_Bin_width) + 1
-            bin_high = TMath.Nint((mom_high - self.momentum_lower_limit) / self.momentum_Bin_width) + 1
+            bin_low = TMath.Nint((mom_low - self.MomLowLimit()) / self.MomBinWidth()) + 1
+            bin_high = TMath.Nint((mom_high - self.MomLowLimit()) / self.MomBinWidth()) + 1
             return histo.Integral(bin_low,bin_high)
 
         def GetNReco(self, histo, mom_low, mom_high):
@@ -487,8 +537,8 @@ class YieldFunctions:
             Nrec_error = 0
             # compute error from sum of weigths in the bins
             # translate mom_low and mom_up in bin numbers
-            bin_low = TMath.Nint((mom_low - self.momentum_lower_limit) / self.momentum_Bin_width)+1
-            bin_high = TMath.Nint((mom_high - self.momentum_lower_limit) / self.momentum_Bin_width)+1
+            bin_low = TMath.Nint((mom_low - self.MomLowLimit()) / self.MomBinWidth())+1
+            bin_high = TMath.Nint((mom_high - self.MomLowLimit()) / self.MomBinWidth())+1
             temp_error_sum = 0
             for i in range(bin_low, bin_high):
                 temp_error_sum += pow(histo.GetBinError(i), 2)
@@ -508,32 +558,32 @@ class YieldFunctions:
             return efficiency_error
 
         def GetDIOEffError(self, Nrec, Nrec_error, Ngen, Ngen_error):
-            efficiency_error = sqrt( pow(Nrec_error / Ngen, 2) + pow( Nrec * Ngen_error / (Ngen*Ngen), 2) )
+            efficiency_error = math.sqrt( pow(Nrec_error / Ngen, 2) + pow( Nrec * Ngen_error / (Ngen*Ngen), 2) )
             return efficiency_error
 
 
-        def GetSignalExpectedYield(self, POT, stopsperPOT, capturesperStop, efficiency_CE):
+        def GetSignalExpectedYield(self, efficiency_CE):
             # assume BF of 10E-16 and calculate expected signal for this BF
-            BF_assumption=1E-16
-            N_CE_expected = POT * stopsperPOT * capturesperStop * BF_assumption * efficiency_CE
+            BF_assumption=1e-16
+            N_CE_expected = self.GetPOT() * self.MuonStopsPerPOT() * self.CapturesPerStop() * BF_assumption * efficiency_CE
             return N_CE_expected
 
         #TODO: Make this its own class:
-        def GetSES(self, POT, stopsperPOT, capturesperStop, efficiency_CE):
+        def GetSES(self, efficiency_CE):
             # calculate single event sensitivity (SES), corresponds to branching fraction where 1 signal event is observed
-        	SES = 1. / ( POT * stopsperPOT * capturesperStop * efficiency_CE )
+        	SES = 1. / ( self.GetPOT() * self.MuonStopsPerPOT() * self.CapturesPerStop() * efficiency_CE )
         	return SES
 
-        def GetSESError(self, POT, stopsperPOT, capturesperStop, efficiency_CE, efficiency_error_CE):
+        def GetSESError(self, efficiency_CE, efficiency_error_CE):
             # calculate error of single event sensitivity (SES), corresponds to uncertainting on branching fraction where 1 signal event is observed
-            SES = 1. / ( POT * stopsperPOT * capturesperStop * pow(efficiency_CE, 2) ) * efficiency_error_CE # error propagation on SES calculation
+            SES = 1. / ( self.GetPOT() * self.MuonStopsPerPOT() * self.CapturesPerStop() * pow(efficiency_CE, 2) ) * efficiency_error_CE # error propagation on SES calculation
             return SES
 
-        def GetDIOExpectedYield(self, N_DIO_rec, N_DIO_gen, POT, stopsperPOT, decaysperStop, mom_low, mom_high):
-            G_number_DIOs_represented = Histos._diocz_f.Integral(mom_low,mom_high);
-            N_DIO_expected = N_DIO_rec * G_number_DIOs_represented * POT * stopsperPOT * decaysperStop / N_DIO_gen;
-            N_DIO_expected_error = G_number_DIOs_represented * POT * stopsperPOT * decaysperStop * efficiency_error_DIO # compute error on N_DIO_expected from error on the efficiency
-            if (abs(mom_low-self.signal_start) < 0.01 and abs(mom_high-self.signal_end) < 0.01):
+        def GetDIOExpectedYield(self, N_DIO_rec, N_DIO_gen, efficiency_error_DIO, mom_low, mom_high):
+            G_number_DIOs_represented = self._diocz_f.Integral(mom_low,mom_high)#self.DIO.GetDIOIntegral(mom_low, mom_high)
+            N_DIO_expected = N_DIO_rec * G_number_DIOs_represented * self.GetPOT() * self.MuonStopsPerPOT() * self.DecaysPerStop() / N_DIO_gen
+            N_DIO_expected_error = G_number_DIOs_represented * self.GetPOT() * self.MuonStopsPerPOT() * self.DecaysPerStop() * efficiency_error_DIO # compute error on N_DIO_expected from error on the efficiency
+            if (abs(mom_low-self.SignalRegionStart()) < 0.01 and abs(mom_high-self.SignalRegionEnd()) < 0.01):
                 print( "===========================================================================")
                 print( "N_DIO_rec = " , N_DIO_rec )
                 print( "N_DIO_gen = " , N_DIO_gen )
@@ -545,33 +595,34 @@ class YieldFunctions:
                 print( "N_DIO_expected_error = " , N_DIO_expected_error)
             return N_DIO_expected, N_DIO_expected_error
 
-        def GetRPCExpectedYield(self, integral_RPCs, integral_RPCs_error, mom_low, mom_high): #TODO - add in same functionality as RPC
-            integral_RPCs_error = 0
-            integral_RPCs = histo_RPCs.IntegralAndError( histo_RPCs.FindBin(mom_low), histo_RPCs.FindBin(mom_high), integral_RPCs_error )
-            return integral_RPCs, integral_RPCs_error
+        def GetInternalRPCExpectedYield(self, eff): #TODO - add in same functionality as RPC
+            N_RPC_expected = self.GetPOT() * self.PionStopsPerPOT() * self.RhoIntRPC() * self.RPCBF() * eff
+            return N_RPC_expected
 
-        def GetBFUL(self, Nsig_UL, POT, stopsperPOT, capturesperStop, efficiency_CE):
-            BF_upper_limit = Nsig_UL / ( POT * stopsperPOT * capturesperStop * efficiency_CE )
+        def GetExternalRPCExpectedYield(self, eff): #TODO - add in same functionality as RPC
+            N_RPC_expected = self.GetPOT() * self.PionStopsPerPOT() *  self.RPCBF() * eff
+            return N_RPC_expected
+
+        def GetBFUL(self, Nsig_UL, efficiency_CE):
+            BF_upper_limit = Nsig_UL / ( self.GetPOT() * self.MuonStopsPerPOT() * self.CapturesPerStop() * efficiency_CE )
             return BF_upper_limit
 
-        def GetBFULError(self, Nsig_UL, Nsig_UL_error, POT, stopsperPOT, capturesperStop, efficiency_CE, efficiency_error_CE):
-            BF_upper_limit_error = 1. / (POT * stopsperPOT * capturesperStop) * math.sqrt(pow(Nsig_UL_error/efficiency_CE, 2)
+        def GetBFULError(self, Nsig_UL, Nsig_UL_error, efficiency_CE, efficiency_error_CE):
+            BF_upper_limit_error = 1. / (self.GetPOT() * self.MuonStopsPerPOT() * self.CapturesPerStop()) * math.sqrt(pow(Nsig_UL_error/efficiency_CE, 2)
             + pow(Nsig_UL * efficiency_error_CE/(efficiency_CE*efficiency_CE), 2))
             return BF_upper_limit_error
 
-        def stopsperPOT(self, Ngen_CE):
-            return Ngen_CE / (75. * 100. * 10000.)
 
         def isfinite(self, value):
             return TMath.Finite(value)
 
         def FillResults(self):
-            mom_low=self.momentum_lower_limit
+            mom_low=self.MomLowLimit()
             stats = StatsFunctions()
             Ngen_CE = self.Histos.histo_CE_generated.GetEntries()
-            while( mom_low < self.momentum_upper_limit):
+            while( mom_low < self.MomHighLimit()):
                 mom_high=mom_low+0.05
-                while(mom_high < self.momentum_upper_limit):
+                while(mom_high < self.MomHighLimit()):
                     #perform calculations, check results for reasanable values and for infinity or NaN, save results
                     result = Results()
                     result.momentum_low = mom_low
@@ -591,6 +642,7 @@ class YieldFunctions:
                         continue
 
                     result.efficiency_CE = self.GetRecoEff(result.N_CE_rec,result.N_CE_gen)
+
                     if (self.isfinite(result.efficiency_CE)<1):
                          continue
 
@@ -598,23 +650,23 @@ class YieldFunctions:
                     if (self.isfinite(result.efficiency_error_CE)<1):
                         continue
 
-                    result.N_CE_expected = self.GetSignalExpectedYield(POT,self.stopsperPOT,self.capturesperStop,result.efficiency_CE)
+                    result.N_CE_expected = self.GetSignalExpectedYield(result.efficiency_CE)
                     if (self.isfinite(result.N_CE_expected)<1):
                         continue
                     if (result.N_CE_expected==0):
                         continue
 
-                    result.N_CE_expected_error = self.GetSignalExpectedYield(self.POT,self.stopsperPOT,self.capturesperStop,result.efficiency_error_CE)
+                    result.N_CE_expected_error = self.GetSignalExpectedYield(result.efficiency_error_CE)
                     if (self.isfinite(result.N_CE_expected_error)<1):
                         continue
                     if (result.N_CE_expected_error==0):
                         continue
 
-                    result.SES = self.GetSES(self.POT,self.stopsperPOT,self.capturesperStop,result.efficiency_CE)
+                    result.SES = self.GetSES(result.efficiency_CE)
                     if (self.isfinite(result.SES)<1):
                         continue
 
-                    result.SES_error = self.GetSESError(self.POT,self.stopsperPOT,self.capturesperStop,result.efficiency_CE,result.efficiency_error_CE)
+                    result.SES_error = self.GetSESError(result.efficiency_CE,result.efficiency_error_CE)
                     if (self.isfinite(result.SES_error)<1):
                         continue
 
@@ -644,7 +696,7 @@ class YieldFunctions:
                     if (self.isfinite(result.efficiency_error_DIO)<1):
                         continue
 
-                    result.N_DIO_expected, result.N_DIO_expected_erro = self.GetDIOExpectedYield(result.N_DIO_rec,result.N_DIO_gen,POT,stopsperPOT,decaysperStop,mom_low,mom_high);
+                    result.N_DIO_expected, result.N_DIO_expected_error = self.GetDIOExpectedYield(result.N_DIO_rec,result.N_DIO_gen, result.efficiency_error_DIO, mom_low,mom_high);
                     if (self.isfinite(result.N_DIO_expected)<1):
                         continue
 
@@ -665,13 +717,13 @@ class YieldFunctions:
 
                         result.Nsig_UL_error = max(temp_Nsig_UL_error_lower, temp_Nsig_UL_error_upper) # take maximum of errors to avoid asymmetric errors on Nsig_UL
 
-                    result.BF_UL = self.GetBFUL(result.Nsig_UL,POT,stopsperPOT,capturesperStop,result.efficiency_CE);
+                    result.BF_UL = self.GetBFUL(result.Nsig_UL,result.efficiency_CE);
                     if (self.isfinite(result.BF_UL)<1):
                         continue
                     if (result.BF_UL==0):
                         continue
 
-                    result.BF_UL_error = self.GetBFULError(results.Nsig_UL,results.Nsig_UL_error,POT,stopsperPOT,capturesperStop,results.efficiency_CE,results.efficiency_error_CE);
+                    result.BF_UL_error = self.GetBFULError(results.Nsig_UL,results.Nsig_UL_error,results.efficiency_CE,results.efficiency_error_CE);
                     if (self.isfinite(result.BF_UL_error)<1):
                         continue
                     if (result.BF_UL_error==0):

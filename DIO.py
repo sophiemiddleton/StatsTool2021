@@ -3,7 +3,7 @@
 # Purpose : Functions associated with the DIO
 
 import sys
-
+from ROOT import TF1, TCanvas
 class DIO :
 
     def __init__(self):
@@ -31,6 +31,7 @@ class DIO :
             return norm*(a5*pow(delta,5) + a6*pow(delta,6) + a7*pow(delta,7) + a8*pow(delta,8))
         else:
             return 0.0
+
     def DIOWeight(self, x):
         ee = x
         mal = 25133
@@ -45,3 +46,11 @@ class DIO :
             return (a5*pow(delta,5) + a6*pow(delta,6) + a7*pow(delta,7) + a8*pow(delta,8))
         else:
             return 0.0
+
+    def GetDIOIntegral(self, mom_low, mom_high):
+        c1 = TCanvas()
+        _diocz_f = TF1("_diocz_f",self.DIOcz, 90,110.,1)
+        _diocz_f.SetParameter(0,1.0)
+        _diocz_f.Draw()
+        c1.SaveAs("DIO.root")
+        return _diocz_f.Integral(mom_low,mom_high)
