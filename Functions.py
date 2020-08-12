@@ -476,8 +476,6 @@ class YieldFunctions:
             self.Histos = histos
             self.Results = []
             self.DIO = DIO()
-            self._diocz_f = TF1("_diocz_f",DIO.DIOcz(par[0]), 90,110.,1)
-            self._diocz_f.SetParameter(0,1.0)
 
         def MomLowLimit(self):
             return self.momentum_lower_limit
@@ -580,7 +578,7 @@ class YieldFunctions:
             return SES
 
         def GetDIOExpectedYield(self, N_DIO_rec, N_DIO_gen, efficiency_error_DIO, mom_low, mom_high):
-            G_number_DIOs_represented = self._diocz_f.Integral(mom_low,mom_high)#self.DIO.GetDIOIntegral(mom_low, mom_high)
+            G_number_DIOs_represented = self.DIO.GetInt(mom_low, mom_high)#self.DIO.GetDIOIntegral(mom_low, mom_high)
             N_DIO_expected = N_DIO_rec * G_number_DIOs_represented * self.GetPOT() * self.MuonStopsPerPOT() * self.DecaysPerStop() / N_DIO_gen
             N_DIO_expected_error = G_number_DIOs_represented * self.GetPOT() * self.MuonStopsPerPOT() * self.DecaysPerStop() * efficiency_error_DIO # compute error on N_DIO_expected from error on the efficiency
             if (abs(mom_low-self.SignalRegionStart()) < 0.01 and abs(mom_high-self.SignalRegionEnd()) < 0.01):

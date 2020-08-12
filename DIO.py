@@ -4,6 +4,8 @@
 
 import sys
 from ROOT import TF1, TCanvas
+import scipy.integrate as integrate
+
 class DIO :
 
     def __init__(self):
@@ -14,9 +16,9 @@ class DIO :
     is from Czarnecki etal, 'Muon decay in orbit:spectrum of high-energy electrons',
     for E>85 MeV
     """
-    def DIOcz(self, x, par):
-        ee = x[0];
-        norm = par[0];
+    def DIOcz(self, x):
+        ee = x;
+        norm = 1; #par[0];
         mal = 25133
         mmu = 105.654
         emu = 105.194
@@ -54,3 +56,9 @@ class DIO :
         _diocz_f.Draw()
         c1.SaveAs("DIO.root")
         return _diocz_f.Integral(mom_low,mom_high)
+
+    def GetInt(self,mom_low, mom_high):
+        f = lambda x:self.DIOcz(x)
+        intergral = integrate.quad(f, 90,110)
+        print("intergral",intergral)
+        return intergral
