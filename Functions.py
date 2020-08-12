@@ -470,7 +470,7 @@ class YieldFunctions:
             self.muonstopsperPOT = 0.00159 #94206/1e8
             #RPC:
             self.pionstopsperPOT = 205856/1e8
-            self.psurv = 1.
+            self.psurv = 2.31E-04
             self.frpc = 0.0215
             self.rhoRPC = 0.0069
             self.Histos = histos
@@ -519,6 +519,8 @@ class YieldFunctions:
         def RPCBF(self):
             return self.rhoRPC
 
+        def PionPsurv(self):
+            return self.psurv
         def GetIntegral(self, histo, mom_low, mom_high):
             # Translate mom_low and mom_up in bin numbers
             bin_low = TMath.Nint((mom_low - self.MomLowLimit()) / self.MomBinWidth()) + 1
@@ -559,7 +561,6 @@ class YieldFunctions:
             efficiency_error = math.sqrt( pow(Nrec_error / Ngen, 2) + pow( Nrec * Ngen_error / (Ngen*Ngen), 2) )
             return efficiency_error
 
-
         def GetSignalExpectedYield(self, efficiency_CE):
             # assume BF of 10E-16 and calculate expected signal for this BF
             BF_assumption=1e-16
@@ -593,12 +594,12 @@ class YieldFunctions:
                 print( "N_DIO_expected_error = " , N_DIO_expected_error)
             return N_DIO_expected, N_DIO_expected_error
 
-        def GetInternalRPCExpectedYield(self, eff): #TODO - add in same functionality as RPC
-            N_RPC_expected = self.GetPOT() * self.PionStopsPerPOT() * self.RhoIntRPC() * self.RPCBF() * eff
+        def GetInternalRPCExpectedYield(self, N_RPCs_expected, N_RPCs_expected_error, mom_low, mom_high, eff):
+            N_RPC_expected = self.GetPOT() * self.PionStopsPerPOT() * self.RhoIntRPC() * self.RPCBF() * self.PionPsurv()
             return N_RPC_expected
 
-        def GetExternalRPCExpectedYield(self, eff): #TODO - add in same functionality as RPC
-            N_RPC_expected = self.GetPOT() * self.PionStopsPerPOT() *  self.RPCBF() * eff
+        def GetExternalRPCExpectedYield(self, N_RPCs_expected, N_RPCs_expected_error, mom_low, mom_high, eff):
+            N_RPC_expected = self.GetPOT() * self.PionStopsPerPOT() *  self.RPCBF() * self.PionPsurv() * eff
             return N_RPC_expected
 
         def GetBFUL(self, Nsig_UL, efficiency_CE):
@@ -609,7 +610,6 @@ class YieldFunctions:
             BF_upper_limit_error = 1. / (self.GetPOT() * self.MuonStopsPerPOT() * self.CapturesPerStop()) * math.sqrt(pow(Nsig_UL_error/efficiency_CE, 2)
             + pow(Nsig_UL * efficiency_error_CE/(efficiency_CE*efficiency_CE), 2))
             return BF_upper_limit_error
-
 
         def isfinite(self, value):
             return TMath.Finite(value)
@@ -682,6 +682,24 @@ class YieldFunctions:
                         continue
                     print("Result.N_DIO_rec = ",result.N_DIO_rec)
 
+                    result.N_intRPC_rec = self.GetNReco(self.Histos.histo_intRPC_reconstructed,mom_low,mom_high)
+                    if (self.isfinite(result.N_intRPC_rec)<1):
+                        continue
+                    print("Result.N_intRPC_rec = ",result.N_intRPC_rec)
+
+                    result.N_intRPC_gen = self.GetNReco(self.Histos.histo_intRPC_generated,mom_low,mom_high)
+                    if (self.isfinite(result.N_intRPC_gen)<1):
+                        continue
+
+                    result.N_extRPC_rec = self.GetNReco(self.Histos.histo_extRPC_generated,mom_low,mom_high)
+                    if (self.isfinite(result.N_extRPC_rec)<1):
+                        continue
+                    print("Result.N_extRPC_rec = ",result.N_extRPC_rec)
+
+                    result.N_extRPC_gen = self.GetNReco(self.Histos.histo_extRPC_generated,mom_low,mom_high)
+                    if (self.isfinite(result.N_extRPC_gen)<1):
+                        continue
+
                     result.N_DIO_rec_error = self.GetNRecoError(self.Histos.histo_DIO_reconstructed_reweighted,mom_low,mom_high)
                     if (self.isfinite(result.N_DIO_rec_error)<1):
                         continue
@@ -698,11 +716,17 @@ class YieldFunctions:
                     if (self.isfinite(result.N_DIO_expected)<1):
                         continue
 
-                    self.GetRPCExpectedYield(result.N_RPCs_expected, result.N_RPCs_expected_error, mom_low, mom_high)
-                    if (self.isfinite(result.N_RPCs_expected)<1):
+                    result.efficiency_intRPC = self.GetRecoEff(result.N_intRPC_rec,result.N_intRPC_gen)
+                    self.GetInternalRPCExpectedYield(result.N_intRPCs_expected, result.N_intRPCs_expected_error, mom_low, mom_high, result.efficiency_intRPC)
+                    if (self.isfinite(result.N_intRPCs_expected)<1):
                         continue
 
-                    result.Nsig_UL = stats.GetFeldmanCousinsSensitivity(result.N_DIO_expected + result.N_RPCs_expected)
+                    result.efficiency_extRPC = self.GetRecoEff(result.N_extRPC_rec,result.N_extRPC_gen)
+                    self.GetExternalRPCExpectedYield(result.N_extRPCs_expected, result.N_extRPCs_expected_error, mom_low, mom_high, result.efficiency_extRPC)
+                    if (self.isfinite(result.N_extRPCs_expected)<1):
+                        continue
+
+                    result.Nsig_UL = stats.GetFeldmanCousinsSensitivity(result.N_DIO_expected + result.N_intRPCs_expected + result.N_extRPCs_expected)
                     if (self.isfinite(result.Nsig_UL)<1):
                         continue
 
@@ -721,7 +745,7 @@ class YieldFunctions:
                     if (result.BF_UL==0):
                         continue
 
-                    result.BF_UL_error = self.GetBFULError(results.Nsig_UL,results.Nsig_UL_error,results.efficiency_CE,results.efficiency_error_CE);
+                    result.BF_UL_error = self.GetBFULError(result.Nsig_UL,result.Nsig_UL_error,result.efficiency_CE,result.efficiency_error_CE);
                     if (self.isfinite(result.BF_UL_error)<1):
                         continue
                     if (result.BF_UL_error==0):
@@ -730,9 +754,10 @@ class YieldFunctions:
                     result.optimal_window=0 # set optimal window flag to 0, set flag to 1 for optimal window entry later
 
                     self.Results.append(result)
-                    mom_high+=momentum_Bin_width
-                mom_low+=momentum_Bin_width
+                    mom_high += self.momentum_Bin_width
+                mom_low += self.momentum_Bin_width
             self.Result.PrintResults()
+            
             # iterate over results_vector and find the optimal window with respect to the 90% Feldman-Cousins BF upper limit
             temp_index = -1
             temp_BF_UL = 999

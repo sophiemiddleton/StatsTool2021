@@ -3,7 +3,7 @@
 # Purpose : Functions associated with the DIO
 
 import sys
-from ROOT import TF1, TCanvas
+from ROOT import TF1
 import scipy.integrate as integrate
 
 class DIO :
@@ -50,15 +50,12 @@ class DIO :
             return 0.0
 
     def GetDIOIntegral(self, mom_low, mom_high):
-        c1 = TCanvas()
         _diocz_f = TF1("_diocz_f",self.DIOcz, 90,110.,1)
         _diocz_f.SetParameter(0,1.0)
-        _diocz_f.Draw()
-        c1.SaveAs("DIO.root")
         return _diocz_f.Integral(mom_low,mom_high)
 
     def GetInt(self,mom_low, mom_high):
         f = lambda x:self.DIOcz(x)
         intergral = integrate.quad(f, 90,110)
         print("intergral",intergral)
-        return intergral
+        return intergral[0]

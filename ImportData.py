@@ -9,10 +9,13 @@ import math
 
 class ImportData :
 
-    def __init__(self, CEfileName, DIOfileName , treeName = "TrkAnaNeg", branchName = "trkana"):
+    def __init__(self, CEfileName, DIOfileName , RPCextfileName, RPCintfileName, CosmicsfileName=False, treeName = "TrkAnaNeg", branchName = "trkana"):
         """ Initialise the Class Object """
         self.CEFileName= CEfileName
         self.DIOFileName= DIOfileName
+        self.RPCextFileName= RPCintfileName
+        self.RPCintFileName= RPCextfileName
+        self.CosmicsFileName = CosmicsfileName
         self.TreeName = treeName
         self.BranchName = branchName
 
@@ -27,6 +30,14 @@ class ImportData :
             input_file = uproot.open(self.DIOFileName)
             input_tree = input_file[self.TreeName][self.BranchName]
             df = input_tree.pandas.df(flatten=flatten)
+        if process == "RPCext":
+            input_file = uproot.open(self.RPCextFileName)
+            input_tree = input_file[self.TreeName][self.BranchName]
+            df = input_tree.pandas.df(flatten=flatten)
+        if process == "RPCint":
+            input_file = uproot.open(self.RPCintFileName)
+            input_tree = input_file[self.TreeName][self.BranchName]
+            df = input_tree.pandas.df(flatten=flatten)
         return df
 
     def GetFeature(self, process, feature, flatten=False ):
@@ -36,6 +47,10 @@ class ImportData :
             filename = self.CEFileName
         if process == "DIO":
             filename = self.DIOFileName
+        if process == "RPCext":
+            filename = self.RPCextFileName
+        if process == "RPCint":
+            filename = self.RPCintFileName
         input_file = uproot.open(filename)
         input_tree = input_file[self.TreeName][self.BranchName]
         df = input_tree.pandas.df(flatten=flatten)
@@ -48,6 +63,10 @@ class ImportData :
             filename = self.CEFileName
         if process == "DIO":
             filename = self.DIOFileName
+        if process == "RPCext":
+            filename = self.RPCextFileName
+        if process == "RPCint":
+            filename = self.RPCintFileName
         input_file = uproot.open(filename)
         input_tree = input_file[self.TreeName][self.BranchName]
         df = input_tree.pandas.df(flatten=flatten)

@@ -7,28 +7,40 @@ class Results :
     def __init__(self):
         self.momentum_low = 0
         self.momentum_high = 0
-        self.N_CE_gen = 0
-        self.N_CE_rec = 0
+
         self.efficiency_CE = 0
         self.efficiency_error_CE = 0
+
+        self.N_CE_gen = 0
+        self.N_CE_rec = 0
         self.N_CE_expected = 0
         self.N_CE_expected_error = 0
-        self.SES = 0
-        self.SES_error = 0
+
         self.N_DIO_gen = 0
         self.N_DIO_gen_error = 0
         self.N_DIO_rec = 0
         self.N_DIO_rec_error = 0
+
         self.efficiency_DIO = 0
         self.efficiency_error_DIO = 0
+
         self.N_DIO_expected = 0
         self.N_DIO_expected_error = 0
-        self.N_RPCs_expected = 0
-        self.N_RPCs_expected_error = 0
+
+        self.efficiency_intRPC = 0
+        self.efficiency_extRPC = 0
+
+        self.N_intRPCs_expected = 0
+        self.N_intRPCs_expected_error = 0
+        self.N_extRPCs_expected = 0
+        self.N_extRPCs_expected_error = 0
+
         self.Nsig_UL = 0
         self.Nsig_UL_error = 0
         self.BF_UL = 0
         self.BF_UL_error = 0
+        self.SES = 0
+        self.SES_error = 0
         self.optimal_window = 0
 
     def PrintResults(self):
