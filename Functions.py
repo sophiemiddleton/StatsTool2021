@@ -9,6 +9,8 @@ from ROOT import TMath, TH1F, TF1
 from Histograms import Histograms
 from Results import Results
 from DIO import DIO
+from RPC import RPC
+from CE import CE
 
 class StatsFunctions :
 
@@ -454,7 +456,6 @@ class StatsFunctions :
         else:
             return 999
 
-
 class YieldFunctions:
 
         def __init__(self,histos):
@@ -468,14 +469,11 @@ class YieldFunctions:
             self.capturesperStop = 0.609
             self.decaysperStop = 0.391
             self.muonstopsperPOT = 0.00159 #94206/1e8
-            #RPC:
-            self.pionstopsperPOT = 205856/1e8
-            self.psurv = 2.31E-04
-            self.frpc = 0.0215
-            self.rhoRPC = 0.0069
             self.Histos = histos
             self.Results = []
             self.DIO = DIO()
+            self.RPC = RPC(self.Histos)
+            self.CE = CE()
 
         def MomLowLimit(self):
             return self.momentum_lower_limit
@@ -510,17 +508,6 @@ class YieldFunctions:
         def MuonStopsPerPOT(self):
             return self.muonstopsperPOT
 
-        def PionStopsPerPOT(self):
-            return self.pionstopsperPOT
-
-        def RhoIntRPC(self):
-            return self.frpc
-
-        def RPCBF(self):
-            return self.rhoRPC
-
-        def PionPsurv(self):
-            return self.psurv
         def GetIntegral(self, histo, mom_low, mom_high):
             # Translate mom_low and mom_up in bin numbers
             bin_low = TMath.Nint((mom_low - self.MomLowLimit()) / self.MomBinWidth()) + 1
@@ -529,8 +516,6 @@ class YieldFunctions:
 
         def GetNReco(self, histo, mom_low, mom_high):
             Nrec = self.GetIntegral(histo, mom_low, mom_high)
-            if (abs(mom_low - 103.5) < 0.01 and abs(mom_high - 105.5) < 0.01):#TODO remove hardcoding
-                print("Nrec = ", Nrec)
             return Nrec
 
         def GetNRecoError(self, histo, mom_low,  mom_high):
@@ -595,11 +580,11 @@ class YieldFunctions:
             return N_DIO_expected, N_DIO_expected_error
 
         def GetInternalRPCExpectedYield(self, N_RPCs_expected, N_RPCs_expected_error, mom_low, mom_high, eff):
-            N_RPC_expected = self.GetPOT() * self.PionStopsPerPOT() * self.RhoIntRPC() * self.RPCBF() * self.PionPsurv()
+            N_RPC_expected = self.GetPOT() * self.RPC.PionStopsPerPOT() * self.RPC.RhoIntRPC() * self.RPC.RPCBF() * self.RPC.PionPsurv() * self.RPC.reco_eff
             return N_RPC_expected
 
         def GetExternalRPCExpectedYield(self, N_RPCs_expected, N_RPCs_expected_error, mom_low, mom_high, eff):
-            N_RPC_expected = self.GetPOT() * self.PionStopsPerPOT() *  self.RPCBF() * self.PionPsurv() * eff
+            N_RPC_expected = self.GetPOT() * self.RPC.PionStopsPerPOT() *  self.RPC.RPCBF() * self.RPC.PionPsurv() * self.RPC.reco_eff
             return N_RPC_expected
 
         def GetBFUL(self, Nsig_UL, efficiency_CE):
@@ -757,7 +742,7 @@ class YieldFunctions:
                     mom_high += self.momentum_Bin_width
                 mom_low += self.momentum_Bin_width
             self.Result.PrintResults()
-            
+
             # iterate over results_vector and find the optimal window with respect to the 90% Feldman-Cousins BF upper limit
             temp_index = -1
             temp_BF_UL = 999

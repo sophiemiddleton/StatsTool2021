@@ -14,6 +14,7 @@ from Histograms import Histograms
 from Functions import *
 from Results import Results
 from ROOT import TCanvas
+
 def plot1DHist(file_name, tree_name, branch_name, feature_name):
     """ Basic funciton to make a plot of a feature """
     file = uproot.open(file_name)
@@ -40,12 +41,16 @@ def main(options, args):
     CE_reco_mom = data.GetFeature( "CE", "deent.mom")
     RPCext_reco_mom = data.GetFeature( "RPCext", "deent.mom")
     RPCint_reco_mom = data.GetFeature( "RPCint", "deent.mom")
+    RPCExternalWeights = data.GetFeature("RPCext", "evtwt.generate")
+    RPCInternalWeights = data.GetFeature("RPCint", "evtwt.generate")
+
     # Fill Reco:
     histos.FillHistogram(histos.histo_CE_reconstructed , CE_reco_mom)
     histos.FillHistogram(histos.histo_DIO_reconstructed_flat , DIO_reco_mom)
     histos.FillHistogram(histos.histo_extRPC_reconstructed , RPCext_reco_mom)
     histos.FillHistogram(histos.histo_intRPC_reconstructed , RPCint_reco_mom)
     histos.DoDIOWeights(histos.histo_DIO_reconstructed_reweighted , DIO_reco_mom)
+    
     # Fill Gen:
     DIO_gen_momTot = data.GetMagFeature("DIO", "demcgen.momx", "demcgen.momx", "demcgen.momx")
     CE_gen_momTot = data.GetMagFeature("CE", "demcgen.momx", "demcgen.momx", "demcgen.momx")
