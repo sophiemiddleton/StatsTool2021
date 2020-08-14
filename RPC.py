@@ -9,7 +9,7 @@ import pandas
 
 class RPC() :
 
-    def __init__(self, histos):
+    def __init__(self, histos,intfile,extfile, min, max, livegate, treename="TrkAnaNeg", branchname="trkana"):
         self.process = "RPC"
         self.POT = 1e8
         self.frpc = 0.0215
@@ -18,8 +18,28 @@ class RPC() :
         self.reco_eff = 1.
         self.sumPionWeights = 0
         self.pionsStopped = 0
-        self.RPCintHist = histos.histo_intRPC_reconstructed
-        self.RPCextHist = histos.histo_extRPC_reconstructed
+        self.SumofSigWeightsInt = 0
+        self.SumofSigWeightsExt = 0
+        self.RecoEffInt = 0
+        self.RecoEffExt = 0
+
+        # Fill Sums in Signal Regions:
+
+        input_file_int = uproot.open(intfile)
+        input_tree_int = input_file_int[treename][branchname]
+        df_int = input_tree_int.pandas.df(flatten=False)
+        for k,l in enumerate(df_int["deent.mom"]):
+            if l>min and l <max and df_int["de.t0"][k]>livegate:
+                self.SumofSigWeightsInt += df_int["evtwt.generate"][k]
+        input_file_ext = uproot.open(extfile)
+        input_tree_ext = input_file_int[treename][branchname]
+        df_ext = input_tree_ext.pandas.df(flatten=False)
+        for k,l in enumerate(df_ext["deent.mom"]):
+            if l>min and l <max and df_ext["de.t0"][k]>livegate:
+                self.SumofSigWeightsExt += df_ext["evtwt.generate"][k]
+        print(self.SumofSigWeightsInt, self.SumofSigWeightsExt)
+
+        # Extract Pion Weights:
         file = uproot.open("../RPC/pions.root")
         Pions = file["stoppedPionDumper;1"]["StoppedPions;1"]
         df = Pions.pandas.df(flatten=False)
@@ -39,7 +59,6 @@ class RPC() :
             self.sumPionWeights += weight
         print(self.sumPionWeights)
 
-
     def PionStopsPerPOT(self):
         return self.pionsStopped/self.POT
 
@@ -53,9 +72,10 @@ class RPC() :
         self.psurv = self.sumPionWeights/self.pionsStopped
         return self.psurv
 
-    def GetRPCEff(self, genRPC, type, max, min):
-        if type == "internal":
-            self.reco_eff = self.RPCintHist.GetIntegral(min,max)/(self.sumPionWeights*(genRPC/self.pionsStopped))
-        if type == "external":
-            self.reco_eff = self.RPCextHist.GetIntegral(min, max)/(self.sumPionWeights*(genRPC/self.pionsStopped))
-        return self.reco_eff
+    def GetRPCEffInt(self, genRPC):
+        self.reco_eff = self.SumofSigWeightsInt/(self.sumPionWeights*(genRPC/self.pionsStopped))
+        return self.RecoEffInt
+
+    def GetRPCEffExt(self, genRPC):
+        self.reco_eff = self.SumofSigWeightsExt/(self.sumPionWeights*(genRPC/self.pionsStopped))
+        return self.RecoEffExt

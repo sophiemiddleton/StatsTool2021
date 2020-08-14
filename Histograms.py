@@ -42,6 +42,9 @@ class Histograms :
         self.histo_intRPC_reconstructed.Scale(target_mass_scalefactor)
         self.histo_extRPC_reconstructed.Scale(target_mass_scalefactor)
 
+        self.RPCIntSigWeights = []
+        self.RPCExtSigWeights = []
+
     def FillHistogram(self, histogram, data):
         for i, j in enumerate(data):
             histogram.Fill(j)

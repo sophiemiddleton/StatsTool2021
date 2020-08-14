@@ -458,13 +458,14 @@ class StatsFunctions :
 
 class YieldFunctions:
 
-        def __init__(self,histos):
+        def __init__(self,histos, rpc_filename_int, rpc_filename_ext):
             self.momentum_lower_limit = 90.
             self.momentum_upper_limit = 110.
             self.nBins = 400
             self.momentum_Bin_width = 0.05
             self.signal_start = 103.75
             self.signal_end = 105.45
+            self.livegate = 700.
             self.POT = 3.6e20
             self.capturesperStop = 0.609
             self.decaysperStop = 0.391
@@ -472,7 +473,7 @@ class YieldFunctions:
             self.Histos = histos
             self.Results = []
             self.DIO = DIO()
-            self.RPC = RPC(self.Histos)
+            self.RPC = RPC(self.Histos,rpc_filename_int, rpc_filename_ext, self.momentum_lower_limit,self.momentum_upper_limit, self.livegate)
             self.CE = CE()
 
         def MomLowLimit(self):
@@ -571,20 +572,17 @@ class YieldFunctions:
                 print( "===========================================================================")
                 print( "N_DIO_rec = " , N_DIO_rec )
                 print( "N_DIO_gen = " , N_DIO_gen )
-                print( "POT = " , POT )
-                print( "stopsperPOT = " , stopsperPOT)
-                print( "decaysperStop = " , decaysperStop )
                 print( "G_number_DIOs_represented = " , G_number_DIOs_represented )
                 print( "N_DIO_expected = " , N_DIO_expected )
                 print( "N_DIO_expected_error = " , N_DIO_expected_error)
             return N_DIO_expected, N_DIO_expected_error
 
         def GetInternalRPCExpectedYield(self, N_RPCs_expected, N_RPCs_expected_error, mom_low, mom_high, eff):
-            N_RPC_expected = self.GetPOT() * self.RPC.PionStopsPerPOT() * self.RPC.RhoIntRPC() * self.RPC.RPCBF() * self.RPC.PionPsurv() * self.RPC.reco_eff
+            N_RPC_expected = self.GetPOT() * self.RPC.PionStopsPerPOT() * self.RPC.RhoIntRPC() * self.RPC.RPCBF() * self.RPC.PionPsurv() * self.RPC.GetRPCEffInt(1E8)
             return N_RPC_expected
 
         def GetExternalRPCExpectedYield(self, N_RPCs_expected, N_RPCs_expected_error, mom_low, mom_high, eff):
-            N_RPC_expected = self.GetPOT() * self.RPC.PionStopsPerPOT() *  self.RPC.RPCBF() * self.RPC.PionPsurv() * self.RPC.reco_eff
+            N_RPC_expected = self.GetPOT() * self.RPC.PionStopsPerPOT() *  self.RPC.RPCBF() * self.RPC.PionPsurv() * self.RPC.GetRPCEffExt(1E9)
             return N_RPC_expected
 
         def GetBFUL(self, Nsig_UL, efficiency_CE):
@@ -656,7 +654,8 @@ class YieldFunctions:
                     result.N_DIO_gen = self.GetNReco(self.Histos.histo_DIO_generated_reweighted, mom_low,mom_high); # use same function as for reconstructed DIOs to integrate histograms
                     if (self.isfinite(result.N_DIO_gen)<1):
                         continue
-
+                    if(result.N_DIO_gen ==0):
+                        continue
                     print("Results.N_DIO_gen = ",result.N_DIO_gen)
 
                     result.N_DIO_gen_erro = self.GetNRecoError(self.Histos.histo_DIO_generated_reweighted, mom_low,mom_high)
@@ -701,12 +700,12 @@ class YieldFunctions:
                     if (self.isfinite(result.N_DIO_expected)<1):
                         continue
 
-                    result.efficiency_intRPC = self.GetRecoEff(result.N_intRPC_rec,result.N_intRPC_gen)
+                    result.efficiency_intRPC = self.GetRecoEff(result.N_intRPC_rec,1e8)
                     self.GetInternalRPCExpectedYield(result.N_intRPCs_expected, result.N_intRPCs_expected_error, mom_low, mom_high, result.efficiency_intRPC)
                     if (self.isfinite(result.N_intRPCs_expected)<1):
                         continue
 
-                    result.efficiency_extRPC = self.GetRecoEff(result.N_extRPC_rec,result.N_extRPC_gen)
+                    result.efficiency_extRPC = self.GetRecoEff(result.N_extRPC_rec,1e9)
                     self.GetExternalRPCExpectedYield(result.N_extRPCs_expected, result.N_extRPCs_expected_error, mom_low, mom_high, result.efficiency_extRPC)
                     if (self.isfinite(result.N_extRPCs_expected)<1):
                         continue

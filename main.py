@@ -41,8 +41,6 @@ def main(options, args):
     CE_reco_mom = data.GetFeature( "CE", "deent.mom")
     RPCext_reco_mom = data.GetFeature( "RPCext", "deent.mom")
     RPCint_reco_mom = data.GetFeature( "RPCint", "deent.mom")
-    RPCExternalWeights = data.GetFeature("RPCext", "evtwt.generate")
-    RPCInternalWeights = data.GetFeature("RPCint", "evtwt.generate")
 
     # Fill Reco:
     histos.FillHistogram(histos.histo_CE_reconstructed , CE_reco_mom)
@@ -50,7 +48,7 @@ def main(options, args):
     histos.FillHistogram(histos.histo_extRPC_reconstructed , RPCext_reco_mom)
     histos.FillHistogram(histos.histo_intRPC_reconstructed , RPCint_reco_mom)
     histos.DoDIOWeights(histos.histo_DIO_reconstructed_reweighted , DIO_reco_mom)
-    
+
     # Fill Gen:
     DIO_gen_momTot = data.GetMagFeature("DIO", "demcgen.momx", "demcgen.momx", "demcgen.momx")
     CE_gen_momTot = data.GetMagFeature("CE", "demcgen.momx", "demcgen.momx", "demcgen.momx")
@@ -61,9 +59,11 @@ def main(options, args):
     histos.FillHistogram(histos.histo_intRPC_generated , RPCint_gen_momTot)
     histos.FillHistogram(histos.histo_extRPC_generated , RPCext_gen_momTot)
     histos.DoDIOWeights(histos.histo_DIO_generated_reweighted , DIO_gen_momTot)
+
     # Build Functions:
     stats = StatsFunctions()
-    yields = YieldFunctions(histos)
+    yields = YieldFunctions(histos, options.RPCint, options.RPCext)
+
     # Fill Results
     yields.FillResults()
     #To make a plot: plot1DHist(options.CE, "TrkAnaNeg", "trkana", "deent.mom")
