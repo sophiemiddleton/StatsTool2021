@@ -460,7 +460,7 @@ class YieldFunctions:
 
         def __init__(self,histos, rpc_filename_int, rpc_filename_ext):
             self.momentum_lower_limit = 90.
-            self.momentum_upper_limit = 110.
+            self.momentum_upper_limit = 107.
             self.nBins = 400
             self.momentum_Bin_width = 0.05
             self.signal_start = 103.75
@@ -568,7 +568,7 @@ class YieldFunctions:
             G_number_DIOs_represented = self.DIO.GetInt(mom_low, mom_high)#self.DIO.GetDIOIntegral(mom_low, mom_high)
             N_DIO_expected = N_DIO_rec * G_number_DIOs_represented * self.GetPOT() * self.MuonStopsPerPOT() * self.DecaysPerStop() / N_DIO_gen
             N_DIO_expected_error = G_number_DIOs_represented * self.GetPOT() * self.MuonStopsPerPOT() * self.DecaysPerStop() * efficiency_error_DIO # compute error on N_DIO_expected from error on the efficiency
-            if (abs(mom_low-self.SignalRegionStart()) < 0.01 and abs(mom_high-self.SignalRegionEnd()) < 0.01):
+            if (abs(mom_low - self.SignalRegionStart()) < 0.01 and abs(mom_high - self.SignalRegionEnd()) < 0.01):
                 print( "===========================================================================")
                 print( "N_DIO_rec = " , N_DIO_rec )
                 print( "N_DIO_gen = " , N_DIO_gen )
@@ -578,11 +578,11 @@ class YieldFunctions:
             return N_DIO_expected, N_DIO_expected_error
 
         def GetInternalRPCExpectedYield(self, N_RPCs_expected, N_RPCs_expected_error, mom_low, mom_high, eff):
-            N_RPC_expected = self.GetPOT() * self.RPC.PionStopsPerPOT() * self.RPC.RhoIntRPC() * self.RPC.RPCBF() * self.RPC.PionPsurv() * self.RPC.GetRPCEffInt(1E8)
+            N_RPC_expected = self.GetPOT() * self.RPC.PionStopsPerPOT() * self.RPC.RhoIntRPC() * self.RPC.RPCBF() * self.RPC.PionPsurv() * self.RPC.GetRPCEffInt(self.RPC.GetGenInt())
             return N_RPC_expected
 
         def GetExternalRPCExpectedYield(self, N_RPCs_expected, N_RPCs_expected_error, mom_low, mom_high, eff):
-            N_RPC_expected = self.GetPOT() * self.RPC.PionStopsPerPOT() *  self.RPC.RPCBF() * self.RPC.PionPsurv() * self.RPC.GetRPCEffExt(1E9)
+            N_RPC_expected = self.GetPOT() * self.RPC.PionStopsPerPOT() *  self.RPC.RPCBF() * self.RPC.PionPsurv() * self.RPC.GetRPCEffExt(self.RPC.GetGenExt())
             return N_RPC_expected
 
         def GetBFUL(self, Nsig_UL, efficiency_CE):
@@ -614,7 +614,7 @@ class YieldFunctions:
                     if (self.isfinite(result.momentum_high)<1):
                         continue
 
-                    result.N_CE_gen=Ngen_CE #TODO
+                    result.N_CE_gen= self.CE.Ngen
                     if (self.isfinite(result.N_CE_gen)<1):
                         continue
 
@@ -651,17 +651,17 @@ class YieldFunctions:
                     if (self.isfinite(result.SES_error)<1):
                         continue
 
-                    result.N_DIO_gen = self.GetNReco(self.Histos.histo_DIO_generated_reweighted, mom_low,mom_high); # use same function as for reconstructed DIOs to integrate histograms
+                    result.N_DIO_gen = self.DIO.GetNgen()#self.GetNReco(self.Histos.histo_DIO_generated, mom_low,mom_high); # use same function as for reconstructed DIOs to integrate histograms
                     if (self.isfinite(result.N_DIO_gen)<1):
                         continue
                     if(result.N_DIO_gen ==0):
                         continue
                     print("Results.N_DIO_gen = ",result.N_DIO_gen)
 
-                    result.N_DIO_gen_erro = self.GetNRecoError(self.Histos.histo_DIO_generated_reweighted, mom_low,mom_high)
+                    result.N_DIO_gen_erro = math.sqrt(self.DIO.Ngen)#self.GetNRecoError(self.Histos.histo_DIO_generated, mom_low,mom_high)
                     if (self.isfinite(result.N_DIO_gen_error)<1):
                         continue
-                    result.N_DIO_rec = self.GetNReco(self.Histos.histo_DIO_reconstructed_reweighted,mom_low,mom_high)
+                    result.N_DIO_rec = self.GetNReco(self.Histos.histo_DIO_reconstructed_flat,mom_low,mom_high)
                     if (self.isfinite(result.N_DIO_rec)<1):
                         continue
                     print("Result.N_DIO_rec = ",result.N_DIO_rec)
@@ -671,7 +671,7 @@ class YieldFunctions:
                         continue
                     print("Result.N_intRPC_rec = ",result.N_intRPC_rec)
 
-                    result.N_intRPC_gen = self.GetNReco(self.Histos.histo_intRPC_generated,mom_low,mom_high)
+                    result.N_intRPC_gen =  self.RPC.GetGenInt()#self.GetNReco(self.Histos.histo_intRPC_generated,mom_low,mom_high)
                     if (self.isfinite(result.N_intRPC_gen)<1):
                         continue
 
@@ -680,7 +680,7 @@ class YieldFunctions:
                         continue
                     print("Result.N_extRPC_rec = ",result.N_extRPC_rec)
 
-                    result.N_extRPC_gen = self.GetNReco(self.Histos.histo_extRPC_generated,mom_low,mom_high)
+                    result.N_extRPC_gen = self.RPC.GetGenExt()#self.GetNReco(self.Histos.histo_extRPC_generated,mom_low,mom_high)
                     if (self.isfinite(result.N_extRPC_gen)<1):
                         continue
 
@@ -740,17 +740,23 @@ class YieldFunctions:
                     self.Results.append(result)
                     mom_high += self.momentum_Bin_width
                 mom_low += self.momentum_Bin_width
-            self.Result.PrintResults()
+            for i, j in enumerate(self.Results):
+                print("=============================")
+                print(i)
+                j.PrintResults()
 
             # iterate over results_vector and find the optimal window with respect to the 90% Feldman-Cousins BF upper limit
             temp_index = -1
             temp_BF_UL = 999
-            for i, j in enumerate(results):
+            for i, j in enumerate(self.Results):
                 if (self.Results[i].BF_UL < temp_BF_UL ):
                     temp_index = i
                     temp_BF_UL = self.Results[i].BF_UL
 
             self.Results[temp_index].optimal_window=1 # set flag to 1 for the entry with the optimal window
+            print("Optimal")
+            self.Results[temp_index].PrintResults()
 
         def WriteHistograms(self):
             """function to make TTree"""
+            #TODO

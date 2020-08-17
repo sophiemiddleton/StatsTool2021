@@ -45,11 +45,17 @@ class Results :
 
     def PrintResults(self):
         """ prints the results to screen """
-        print(" p_low  p_high  Ngen_CE  Nrec_CE             eff_CE        Nexp_CE                    SES               Ngen_DIO               Nrec_DIO            eff_DIO         Nexp_DIO         Nexp_RPC         NNsig_UL                  BF_UL\n");
-        print("====================================================================================================================================================================================================================================\n");
-        print(self.momentum_low,self.momentum_high,self.N_CE_gen,self.N_CE_rec,
-        self.efficiency_CE,self.efficiency_error_CE,self.N_CE_expected,self.N_CE_expected_error,
-        self.SES,self.SES_error,self.N_DIO_gen,self.N_DIO_gen_error,self.N_DIO_rec,self.N_DIO_rec_error,
-        self.efficiency_DIO,self.efficiency_error_DIO,self.N_DIO_expected,self.N_DIO_expected_error,
-        self.N_RPCs_expected,self.N_RPCs_expected_error,self.Nsig_UL,self.Nsig_UL_error,
-        self.BF_UL,self.BF_UL_error )
+        print("Mom Start",self.momentum_low)
+        print("Mom End", self.momentum_high)
+        print("NCE Gen", self.N_CE_gen)
+        print("NCE Reco", self.N_CE_rec)
+        print("CE Eff", self.efficiency_CE,  "+/-", self.efficiency_error_CE)
+        print("CE Expected", self.N_CE_expected, "+/-", self.N_CE_expected_error)
+        print("SES", self.SES, "+/-",self.SES_error)
+        print("DIO Gen", self.N_DIO_gen,  "+/-", self.N_DIO_gen_error)
+        print("DIO Reco",self.N_DIO_rec, "+/-", self.N_DIO_rec_error)
+        print("DIO Eff", self.efficiency_DIO,  "+/-", self.efficiency_error_DIO)
+        print("DIO Expected", self.N_DIO_expected, "+/-", self.N_DIO_expected_error)
+        print("RPC Expected", self.N_intRPCs_expected, "+/-",  self.N_extRPCs_expected)
+        print("Sig uL",self.Nsig_UL, "+/-", self.Nsig_UL_error)
+        print("BFUL", self.BF_UL, "+/-", self.BF_UL_error )

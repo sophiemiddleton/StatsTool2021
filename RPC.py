@@ -22,7 +22,8 @@ class RPC() :
         self.SumofSigWeightsExt = 0
         self.RecoEffInt = 0
         self.RecoEffExt = 0
-
+        self.Ngen_int  = 1e8
+        self.Ngen_ext = 1e9
         # Fill Sums in Signal Regions:
 
         input_file_int = uproot.open(intfile)
@@ -79,3 +80,9 @@ class RPC() :
     def GetRPCEffExt(self, genRPC):
         self.reco_eff = self.SumofSigWeightsExt/(self.sumPionWeights*(genRPC/self.pionsStopped))
         return self.RecoEffExt
+
+    def GetGenExt(self):
+        return self.Ngen_ext
+
+    def GetGenInt(self):
+        return self.Ngen_int

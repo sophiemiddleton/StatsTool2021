@@ -10,7 +10,7 @@ class DIO :
 
     def __init__(self):
         self.process = "DIO"
-
+        self.Ngen = 1e5
     """
     Function to calculate and integrate the DIO spectrum. The following approximation
     is from Czarnecki etal, 'Muon decay in orbit:spectrum of high-energy electrons',
@@ -59,3 +59,6 @@ class DIO :
         intergral = integrate.quad(f, 90,110)
         print("intergral",intergral)
         return intergral[0]
+
+    def GetNgen(self):
+        return self.Ngen
