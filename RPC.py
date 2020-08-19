@@ -30,7 +30,7 @@ class RPC() :
         input_tree_int = input_file_int[treename][branchname]
         df_int = input_tree_int.pandas.df(flatten=False)
         for k,l in enumerate(df_int["deent.mom"]):
-            if l>min and l <max and df_int["de.t0"][k]>livegate:
+            if l > min and l < max and df_int["de.t0"][k]>livegate:
                 self.SumofSigWeightsInt += df_int["evtwt.generate"][k]
         input_file_ext = uproot.open(extfile)
         input_tree_ext = input_file_int[treename][branchname]
@@ -38,25 +38,25 @@ class RPC() :
         for k,l in enumerate(df_ext["deent.mom"]):
             if l>min and l <max and df_ext["de.t0"][k]>livegate:
                 self.SumofSigWeightsExt += df_ext["evtwt.generate"][k]
-        print(self.SumofSigWeightsInt, self.SumofSigWeightsExt)
+        print("sum of RPC weights in sig", self.SumofSigWeightsInt, self.SumofSigWeightsExt)
 
         # Extract Pion Weights:
-        file = uproot.open("../RPC/pions.root")
-        Pions = file["stoppedPionDumper;1"]["StoppedPions;1"]
+        file = uproot.open("../RPC/Pionsv2.root")
+        Pions = file["stoppedPionDumper;1"]["stops;1"]
         df = Pions.pandas.df(flatten=False)
-        for i,j in enumerate(df["StoppedPions.time"]):
-            weight = math.exp(-j/26)
+        for i,j in enumerate(df["stops.tauNormalized"]):
+            weight = math.exp(-j)
             self.sumPionWeights += weight
             self.pionsStopped +=1
         print("Stopped Pions:", self.pionsStopped, "Sum of Weights:", self.sumPionWeights)
 
     def SumPionWeights(self):
         self.sumPionWeights = 0
-        file = uproot.open("../RPC/pions.root")
-        Pions = file["stoppedPionDumper;1"]["StoppedPions;1"]
+        file = uproot.open("../RPC/Pionsv2.root")
+        Pions = file["stoppedPionDumper;1"]["stops;1"]
         df = Pions.pandas.df(flatten=False)
-        for i,j in enumerate(df["StoppedPions.time"]):
-            weight = math.exp(-j/26)
+        for i,j in enumerate(df["stops.tauNormalized"]):
+            weight = math.exp(-j)
             self.sumPionWeights += weight
         print(self.sumPionWeights)
 
