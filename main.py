@@ -79,7 +79,8 @@ options.DIOReco, options.DIOGen, "internal RPC", options.RPCintReco, options.RPC
     yields = YieldFunctions(histos, options.RPCintReco, options.RPCextReco, options.noRPC)
 
     # Fill Results
-    yields.GetSingleResult()
+    yields.FillResults()
+    yields.GetSingleResult(103,105)
     #To make a plot: plot1DHist(options.CE, "TrkAnaNeg", "trkana", "deent.mom")
 
 if __name__ == "__main__":

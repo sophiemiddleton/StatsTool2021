@@ -4,6 +4,7 @@
 
 import sys
 import math
+import numpy
 import ROOT
 from ROOT import TMath, TH1F, TF1
 from Histograms import Histograms
@@ -441,27 +442,28 @@ class StatsFunctions :
     using Feldman-Cousins at 90%CL
     """
     def GetFeldmanCousinsSensitivity(self, background_mean):
+        size = len(self.FeldmanCousins_sensitivityValues)
         if (background_mean < 10): # have only values up to 10 background events in table, will not work for wide DIO spectrum
                 nb        = 2001
                 bInterval = 0.005
                 background_mean_rounded_array_index = TMath.Nint(background_mean / bInterval)
                 if (background_mean_rounded_array_index>0):
                     if (background_mean_rounded_array_index < nb):
-                        print("background_mean_rounded_array_index : ", background_mean_rounded_array_index)
-                        return FeldmanCousins_sensitivityValues[background_mean_rounded_array_index]
+                        print("background_mean_rounded_array_index : ", background_mean_rounded_array_index, size)
+                        return self.FeldmanCousins_sensitivityValues[background_mean_rounded_array_index]
                     else:
                         return 0
                 else:
                      return 0
         else:
-            return 999
+            return 999.
 
 class YieldFunctions:
 
         def __init__(self,histos, rpc_filename_int, rpc_filename_ext, noRPC=False):
             self.noRPC = noRPC
-            self.momentum_lower_limit = 103.
-            self.momentum_upper_limit = 105.
+            self.momentum_lower_limit = 90.
+            self.momentum_upper_limit = 110.
             self.nBins = 400
             self.momentum_Bin_width = 0.05
             self.signal_start = 103.75
@@ -561,14 +563,16 @@ class YieldFunctions:
         	return SES
 
         def GetSESError(self, efficiency_CE, efficiency_error_CE):
-            # calculate error of single event sensitivity (SES), corresponds to uncertainting on branching fraction where 1 signal event is observed
+            # calculate error of single event sensitivity (SES),
+            #corresponds to uncertainting on branching fraction where 1 signal event is observed
             SES = 1. / ( self.GetPOT() * self.MuonStopsPerPOT() * self.CapturesPerStop() * pow(efficiency_CE, 2) ) * efficiency_error_CE # error propagation on SES calculation
             return SES
 
         def GetDIOExpectedYield(self, N_DIO_rec, N_DIO_gen, efficiency_error_DIO, mom_low, mom_high):
             CzerneckiIntegral = self.DIO.GetInt(mom_low, mom_high)
             N_DIO_expected = N_DIO_rec * CzerneckiIntegral * self.GetPOT() * self.MuonStopsPerPOT() * self.DecaysPerStop() / N_DIO_gen
-            N_DIO_expected_error = CzerneckiIntegral * self.GetPOT() * self.MuonStopsPerPOT() * self.DecaysPerStop() * efficiency_error_DIO # compute error on N_DIO_expected from error on the efficiency
+            N_DIO_expected_error = CzerneckiIntegral * self.GetPOT() * self.MuonStopsPerPOT() * self.DecaysPerStop() * efficiency_error_DIO
+            # compute error on N_DIO_expected from error on the efficiency
             if (abs(mom_low - self.SignalRegionStart()) < 0.01 and abs(mom_high - self.SignalRegionEnd()) < 0.01):
                 print( "===========================================================================")
                 print( "N_DIO_rec = " , N_DIO_rec )
@@ -601,7 +605,7 @@ class YieldFunctions:
         def isfinite(self, value):
             return TMath.Finite(value)
 
-        def GetSingleResult(self):
+        def GetSingleResult(self, mom_low, mom_high):
             result = Results()
             stats = StatsFunctions()
             result.N_CE_gen =  self.Histos.histo_CE_generated.GetEntries()
@@ -612,23 +616,22 @@ class YieldFunctions:
             result.N_CE_expected_error = self.GetSignalExpectedYield(result.efficiency_error_CE)
             result.SES = self.GetSES(result.efficiency_CE)
             result.SES_error =  self.GetSESError(result.efficiency_CE,result.efficiency_error_CE)
-            result.N_DIO_gen = self.GetN(self.Histos.histo_DIO_generated_reweighted, self.momentum_lower_limit,self.momentum_upper_limit);
-            result.N_DIO_gen_error = self.GetNError(self.Histos.histo_DIO_generated_reweighted, self.momentum_lower_limit,self.momentum_upper_limit);
-            result.N_DIO_rec = self.GetN(self.Histos.histo_DIO_reconstructed_reweighted , self.momentum_lower_limit,self.momentum_upper_limit);
-            result.N_intRPC_rec = self.GetN(self.Histos.histo_intRPC_reconstructed, self.momentum_lower_limit,self.momentum_upper_limit);
-            result.N_intRPC_gen = self.GetN(self.Histos.histo_intRPC_generated, self.momentum_lower_limit,self.momentum_upper_limit);
-            result.N_extRPC_rec = self.GetN(self.Histos.histo_extRPC_reconstructed,self.momentum_lower_limit,self.momentum_upper_limit);
-            result.N_extRPC_gen = self.GetN(self.Histos.histo_extRPC_generated, self.momentum_lower_limit,self.momentum_upper_limit);
+            result.N_DIO_gen = self.GetN(self.Histos.histo_DIO_generated_reweighted, mom_low, mom_high)
+            result.N_DIO_gen_error = self.GetNError(self.Histos.histo_DIO_generated_reweighted,mom_low, mom_high)
+            result.N_DIO_rec = self.GetN(self.Histos.histo_DIO_reconstructed_reweighted , mom_low, mom_high)
+            result.N_intRPC_rec = self.GetN(self.Histos.histo_intRPC_reconstructed, mom_low, mom_high)
+            result.N_intRPC_gen = self.GetN(self.Histos.histo_intRPC_generated, mom_low, mom_high)
+            result.N_extRPC_rec = self.GetN(self.Histos.histo_extRPC_reconstructed,mom_low, mom_high)
+            result.N_extRPC_gen = self.GetN(self.Histos.histo_extRPC_generated, mom_low, mom_high)
             result.efficiency_intRPC = self.GetRecoEff(result.N_intRPC_rec, result.N_intRPC_gen)
-            self.GetInternalRPCExpectedYield(result.N_intRPCs_expected, result.N_intRPCs_expected_error, self.momentum_lower_limit,self.momentum_upper_limit, result.efficiency_intRPC)
+            self.GetInternalRPCExpectedYield(result.N_intRPCs_expected, result.N_intRPCs_expected_error, mom_low, mom_high, result.efficiency_intRPC)
             result.efficiency_extRPC = self.GetRecoEff(result.N_extRPC_rec, result.N_extRPC_gen)
-            self.GetExternalRPCExpectedYield(result.N_extRPCs_expected, result.N_extRPCs_expected_error, self.momentum_lower_limit,self.momentum_upper_limit, result.efficiency_extRPC)
-            result.N_DIO_rec_error = self.GetNError(self.Histos.histo_DIO_reconstructed_reweighted, self.momentum_lower_limit,self.momentum_upper_limit);
+            self.GetExternalRPCExpectedYield(result.N_extRPCs_expected, result.N_extRPCs_expected_error, mom_low, mom_high, result.efficiency_extRPC)
+            result.N_DIO_rec_error = self.GetNError(self.Histos.histo_DIO_reconstructed_reweighted, mom_low, mom_high)
             result.efficiency_DIO = self.GetRecoEff(result.N_DIO_rec,result.N_DIO_gen)
             result.efficiency_error_DIO = self.GetDIOEffError(result.N_DIO_rec, result.N_DIO_rec_error, result.N_DIO_gen, result.N_DIO_gen_error);
-            result.N_DIO_expected, result.N_DIO_expected_error = self.GetDIOExpectedYield(result.N_DIO_rec,result.N_DIO_gen, result.efficiency_error_DIO,self.momentum_lower_limit,self.momentum_upper_limit);
+            result.N_DIO_expected, result.N_DIO_expected_error = self.GetDIOExpectedYield(result.N_DIO_rec,result.N_DIO_gen, result.efficiency_error_DIO,mom_low, mom_high)
             result.Nsig_UL = stats.GetFeldmanCousinsSensitivity(result.N_DIO_expected + result.N_intRPCs_expected + result.N_extRPCs_expected)
-            # calculate error on Nsig_UL by calculation of the Feldman-Cousins sensitivity of N_DIO_expected - 1*sigma and N_DIO_expected + 1*sigma, take maximum of both values
             result.Nsig_UL_error = 999
             if (result.Nsig_UL != 999):
 
@@ -646,99 +649,89 @@ class YieldFunctions:
             stats = StatsFunctions()
             Ngen_CE = self.Histos.histo_CE_generated.GetEntries()
             while(mom_low < self.MomHighLimit()):
-                mom_high=mom_low+0.05
+                mom_high = mom_low + 0.05
                 while(mom_high < self.MomHighLimit()):
                     print("Evaluating", mom_low, mom_high)
                     #perform calculations, check results for reasanable values and for infinity or NaN, save results
                     result = Results()
                     result.momentum_low = mom_low
-                    if (self.isfinite(result.momentum_low)<1):
+                    if (math.isnan(result.momentum_low)):
                         break
                     result.momentum_high = mom_high
-                    if (self.isfinite(result.momentum_high)<1):
+                    if (math.isnan(result.momentum_high)):
                         break
 
                     result.N_CE_gen =  self.Histos.histo_CE_generated.GetEntries()
-                    if (self.isfinite(result.N_CE_gen)<1):
+                    if (math.isnan(result.N_CE_gen)):
                         break
 
                     result.N_CE_rec = self.GetN(self.Histos.histo_CE_reconstructed, mom_low,mom_high)
-                    if (self.isfinite(result.N_CE_rec)<1):
+                    if (math.isnan(result.N_CE_rec)):
                         break
 
                     if(result.N_CE_gen !=0):
                         result.efficiency_CE = self.GetRecoEff(result.N_CE_rec,result.N_CE_gen)
                     else:
                         result.efficiency_CE = 1
-                    if (self.isfinite(result.efficiency_CE)<1):
+                    if (math.isnan(result.efficiency_CE)):
                          break
 
                     if(result.N_CE_gen !=0):
                         result.efficiency_error_CE = self.GetRecoEffError(result.N_CE_rec,result.N_CE_gen)
                     else :
                         result.efficiency_error_CE = 1
-                    if (self.isfinite(result.efficiency_error_CE)<1):
+                    if (math.isnan(result.efficiency_error_CE) or result.N_CE_gen == 0):
                         break
 
                     result.N_CE_expected = self.GetSignalExpectedYield(result.efficiency_CE)
-                    if (self.isfinite(result.N_CE_expected)<1):
+                    if (math.isnan(result.N_CE_expected)):
                         break
 
                     result.N_CE_expected_error = self.GetSignalExpectedYield(result.efficiency_error_CE)
-                    if (self.isfinite(result.N_CE_expected_error)<1):
-                        break
-
-                    if(result.efficiency_CE!=0):
-                        result.SES = self.GetSES(result.efficiency_CE)
-                        result.SES_error =  self.GetSESError(result.efficiency_CE,result.efficiency_error_CE)
-                    else:
-                        result.SES = 0
-                        result.SES_error =  0
-                    if (self.isfinite(result.SES) < 1):
-                        break
-
-                    if (self.isfinite(result.SES_error) < 1):
+                    if (math.isnan(result.N_CE_expected_error)):
                         break
 
                     result.N_DIO_gen = self.GetN(self.Histos.histo_DIO_generated_reweighted, mom_low, mom_high); # use same function as for reconstructed DIOs to integrate histograms
-                    if (self.isfinite(result.N_DIO_gen) < 1):
+                    if (math.isnan(result.N_DIO_gen)):
                         break
                     if(result.N_DIO_gen == 0):
                         break
                     print("Results.N_DIO_gen = ",result.N_DIO_gen)
 
                     result.N_DIO_gen_error = self.GetNError(self.Histos.histo_DIO_generated_reweighted, mom_low, mom_high)
-                    if (self.isfinite(result.N_DIO_gen_error)<1):
+                    if (math.isnan(result.N_DIO_gen_error)):
                         break
                     result.N_DIO_rec = self.GetN(self.Histos.histo_DIO_reconstructed_reweighted , mom_low, mom_high)
-                    if (self.isfinite(result.N_DIO_rec)<1):
+                    if (math.isnan(result.N_DIO_rec)):
                         break
+
                     print("Result.N_DIO_rec = ",result.N_DIO_rec)
                     if(self.noRPC == False):
                         result.N_intRPC_rec = self.GetN(self.Histos.histo_intRPC_reconstructed, mom_low, mom_high)
-                        if (self.isfinite(result.N_intRPC_rec)<1):
+                        if (math.isnan(result.N_intRPC_rec)):
                             break
                         print("Result.N_intRPC_rec = ",result.N_intRPC_rec)
 
                         result.N_intRPC_gen = self.GetN(self.Histos.histo_intRPC_generated, mom_low, mom_high)
-                        if (self.isfinite(result.N_intRPC_gen)<1):
+                        if (math.isnan(result.N_intRPC_gen)):
                             break
 
                         result.N_extRPC_rec = self.GetN(self.Histos.histo_extRPC_reconstructed, mom_low, mom_high)
-                        if (self.isfinite(result.N_extRPC_rec)<1):
+                        if (math.isnan(result.N_extRPC_rec)):
                             break
                         print("Result.N_extRPC_rec = ",result.N_extRPC_rec)
 
                         result.N_extRPC_gen = self.GetN(self.Histos.histo_extRPC_generated, mom_low, mom_high)
-                        if (self.isfinite(result.N_extRPC_gen)<1):
+                        if (math.isnan(result.N_extRPC_gen)):
                             break
 
                         if( result.N_intRPC_gen !=0):
                             result.efficiency_intRPC = self.GetRecoEff(result.N_intRPC_rec, result.N_intRPC_gen)
                         else:
                             result.efficiency_intRPC = 1
+
                         self.GetInternalRPCExpectedYield(result.N_intRPCs_expected, result.N_intRPCs_expected_error, mom_low, mom_high, result.efficiency_intRPC)
-                        if (self.isfinite(result.N_intRPCs_expected)<1):
+                        if (math.isnan(result.N_intRPCs_expected)):
                             break
 
                         if(result.N_extRPC_gen !=0):
@@ -747,45 +740,54 @@ class YieldFunctions:
                             result.efficiency_extRPC = 1
 
                         self.GetExternalRPCExpectedYield(result.N_extRPCs_expected, result.N_extRPCs_expected_error, mom_low, mom_high, result.efficiency_extRPC)
-                        if (self.isfinite(result.N_extRPCs_expected)<1):
+                        if (math.isnan(result.N_extRPCs_expected)):
                             break
 
                     result.N_DIO_rec_error = self.GetNError(self.Histos.histo_DIO_reconstructed_reweighted, mom_low, mom_high)
-                    if (self.isfinite(result.N_DIO_rec_error)<1):
+                    if (math.isnan(result.N_DIO_rec_error)):
                         break
 
                     result.efficiency_DIO = self.GetRecoEff(result.N_DIO_rec,result.N_DIO_gen)
-                    if (self.isfinite(result.efficiency_DIO)<1):
+                    if (math.isnan(result.efficiency_DIO)):
                         break
 
                     result.efficiency_error_DIO = self.GetDIOEffError(result.N_DIO_rec, result.N_DIO_rec_error, result.N_DIO_gen, result.N_DIO_gen_error);
-                    if (self.isfinite(result.efficiency_error_DIO)<1):
+                    if (math.isnan(result.efficiency_error_DIO)):
                         break
 
                     result.N_DIO_expected, result.N_DIO_expected_error = self.GetDIOExpectedYield(result.N_DIO_rec,result.N_DIO_gen, result.efficiency_error_DIO, mom_low,mom_high);
-                    if (self.isfinite(result.N_DIO_expected)<1):
+                    if (math.isnan(result.N_DIO_expected)):
                         break
 
-                    result.Nsig_UL = stats.GetFeldmanCousinsSensitivity(result.N_DIO_expected + result.N_intRPCs_expected + result.N_extRPCs_expected)
-                    if (self.isfinite(result.Nsig_UL)<1):
+                    if(result.efficiency_CE!=0):
+                        result.SES = self.GetSES(result.efficiency_CE)
+                        result.SES_error =  self.GetSESError(result.efficiency_CE,result.efficiency_error_CE)
+                    else:
+                        result.SES = 0
+                        result.SES_error =  0
+                    if (math.isnan(result.SES) or math.isnan(result.SES_error)):
                         break
 
+                    result.Nsig_UL = stats.GetFeldmanCousinsSensitivity(result.N_DIO_expected) #TODO + result.N_intRPCs_expected + result.N_extRPCs_expected)
+                    if (math.isnan(result.Nsig_UL)):
+                        break
+                    print("Expected DIO", result.N_DIO_expected , result.N_DIO_expected_error)
                     # calculate error on Nsig_UL by calculation of the Feldman-Cousins sensitivity of N_DIO_expected - 1*sigma and N_DIO_expected + 1*sigma, take maximum of both values
                     result.Nsig_UL_error = 999
                     if (result.Nsig_UL != 999):
 
                         temp_Nsig_UL_error_lower = result.Nsig_UL - stats.GetFeldmanCousinsSensitivity(result.N_DIO_expected - result.N_DIO_expected_error)
                         temp_Nsig_UL_error_upper = stats.GetFeldmanCousinsSensitivity(result.N_DIO_expected + result.N_DIO_expected_error) - result.Nsig_UL
-
                         result.Nsig_UL_error = max(temp_Nsig_UL_error_lower, temp_Nsig_UL_error_upper) # take maximum of errors to avoid asymmetric errors on Nsig_UL
 
                     if(result.efficiency_CE !=0 and result.efficiency_error_CE!=0):
                         result.BF_UL = self.GetBFUL(result.Nsig_UL,result.efficiency_CE);
                         result.BF_UL_error = self.GetBFULError(result.Nsig_UL,result.Nsig_UL_error,result.efficiency_CE,result.efficiency_error_CE);
-                    if (self.isfinite(result.BF_UL_error)<1):
+
+                    if (math.isnan(result.BF_UL_error)):
                         break
                     print("BFUL", result.efficiency_CE , result.BF_UL)
-                    if (self.isfinite(result.BF_UL)<1):
+                    if (math.isnan(result.BF_UL)):
                         break
 
                     result.optimal_window=0 # set optimal window flag to 0, set flag to 1 for optimal window entry later

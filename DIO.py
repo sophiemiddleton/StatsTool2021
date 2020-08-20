@@ -55,7 +55,7 @@ class DIO :
 
     def GetInt(self,mom_low, mom_high):
         f = lambda x:self.DIOcz(x)
-        intergral = integrate.quad(f, 90,110)
+        intergral = integrate.quad(f, mom_low,mom_high)
         print("intergral",intergral)
         return intergral[0]
 
