@@ -41,7 +41,7 @@ options.DIOReco, options.DIOGen, "internal RPC", options.RPCintReco, options.RPC
     recodata = ImportRecoData(options.CEReco, options.DIOReco, options.RPCextReco, options.RPCintReco)
     gendata = ImportGenData(options.CEGen, options.DIOGen, options.RPCextGen, options.RPCintGen)
     histos = Histograms(400, 90., 110.)
-    showRPC = options.noRPC
+    showRPC = options.showRPC
     #Get Data:
     DIO_reco_mom = recodata.GetFeature( "DIO", "deent.mom")
     CE_reco_mom = recodata.GetFeature( "CE", "deent.mom")
@@ -76,7 +76,7 @@ options.DIOReco, options.DIOGen, "internal RPC", options.RPCintReco, options.RPC
 
     # Build Functions:
     stats = StatsFunctions()
-    yields = YieldFunctions(histos, options.RPCintReco, options.RPCextReco, options.noRPC)
+    yields = YieldFunctions(histos, options.RPCintReco, options.RPCextReco, showRPC)
 
     # Fill Results
     yields.FillResults()
@@ -88,7 +88,7 @@ if __name__ == "__main__":
     parser.add_option('-b', action='store_true', dest='noX', default=False, help='no X11 windows')
     parser.add_option('-a','--CEReco', dest='CEReco', default = 'CEData.root',help='NTuple with CE', metavar='Cedir')
     parser.add_option('-o','--DIOReco', dest='DIOReco', default = 'DIOData.root',help='NTuple with DIO', metavar='Diodir')
-    parser.add_option('-v','--noRPC', dest='noRPC', default = 'False',help='include RPC', metavar='rpc')
+    parser.add_option('-v','--showRPC', dest='showRPC', default = 'True',help='include RPC', metavar='rpc')
     parser.add_option('-p','--RPCextReco', dest='RPCextReco', default = 'RPCData.root',help='NTuple with RPC', metavar='Rpcdir')
     parser.add_option('-t','--RPCintReco', dest='RPCintReco', default = 'RPCData.root',help='NTuple with RPC', metavar='Rpcdir')
     parser.add_option('-g','--CEGen', dest='CEGen', default = 'CEGen.root',help='NTuple with CE', metavar='Cedir')

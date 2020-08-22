@@ -460,10 +460,10 @@ class StatsFunctions :
 
 class YieldFunctions:
 
-        def __init__(self,histos, rpc_filename_int, rpc_filename_ext, noRPC=False):
-            self.noRPC = noRPC
-            self.momentum_lower_limit = 90.
-            self.momentum_upper_limit = 110.
+        def __init__(self,histos, rpc_filename_int, rpc_filename_ext, showRPC=True):
+            self.showRPC = showRPC
+            self.momentum_lower_limit = 100.
+            self.momentum_upper_limit = 105.
             self.nBins = 400
             self.momentum_Bin_width = 0.05
             self.signal_start = 103.75
@@ -472,7 +472,7 @@ class YieldFunctions:
             self.POT = 3.6e20
             self.capturesperStop = 0.609
             self.decaysperStop = 0.391
-            self.muonstopsperPOT = 0.00159 #94206/1e8
+            self.muonstopsperPOT = 0.00159
             self.Histos = histos
             self.Results = []
             self.DIO = DIO()
@@ -609,7 +609,7 @@ class YieldFunctions:
             result = Results()
             stats = StatsFunctions()
             result.N_CE_gen =  self.Histos.histo_CE_generated.GetEntries()
-            result.N_CE_rec = self.Histos.histo_CE_reconstructed.GetEntries()
+            result.N_CE_rec = self.GetN(self.Histos.histo_DIO_reconstructed_reweighted , mom_low, mom_high)
             result.efficiency_CE = self.GetRecoEff(result.N_CE_rec,result.N_CE_gen)
             result.efficiency_error_CE = self.GetRecoEffError(result.N_CE_rec,result.N_CE_gen)
             result.N_CE_expected = self.GetSignalExpectedYield(result.efficiency_CE)
@@ -706,7 +706,7 @@ class YieldFunctions:
                         break
 
                     print("Result.N_DIO_rec = ",result.N_DIO_rec)
-                    if(self.noRPC == False):
+                    if(self.showRPC == True):
                         result.N_intRPC_rec = self.GetN(self.Histos.histo_intRPC_reconstructed, mom_low, mom_high)
                         if (math.isnan(result.N_intRPC_rec)):
                             break
@@ -790,7 +790,7 @@ class YieldFunctions:
                     if (math.isnan(result.BF_UL)):
                         break
 
-                    result.optimal_window=0 # set optimal window flag to 0, set flag to 1 for optimal window entry later
+                    result.optimal_window = 0 # set optimal window flag to 0, set flag to 1 for optimal window entry later
                     self.Results.append(result)
                     mom_high += self.momentum_Bin_width
                 mom_low += self.momentum_Bin_width
