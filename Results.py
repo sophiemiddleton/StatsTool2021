@@ -2,8 +2,7 @@
 # Date : 2020
 # Purpose : Will store Results of the calculations
 
-# TODO - this class should be slight into the different purposed structs
-
+# TODO - this class should be split into the different purposed structs
 
 class Results :
 

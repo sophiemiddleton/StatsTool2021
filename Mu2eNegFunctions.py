@@ -460,12 +460,12 @@ class StatsFunctions :
 
 class YieldFunctions:
 
-        def __init__(self,histos, rpc_filename_int, rpc_filename_ext, showRPC=True):
+        def __init__(self,histos, nbins, mom_low, mom_high, rpc_filename_int, rpc_filename_ext, showRPC=True):
             self.showRPC = showRPC
-            self.momentum_lower_limit = 100.
-            self.momentum_upper_limit = 105.
-            self.nBins = 400
-            self.momentum_Bin_width = 0.05
+            self.momentum_lower_limit = mom_low
+            self.momentum_upper_limit = mom_high
+            self.nBins = nbins
+            self.momentum_Bin_width = (mom_high - mom_low)/nbins
             self.signal_start = 103.75
             self.signal_end = 105.45
             self.livegate = 700.
@@ -790,7 +790,7 @@ class YieldFunctions:
                     if (math.isnan(result.BF_UL)):
                         break
 
-                    result.optimal_window = 0 # set optimal window flag to 0, set flag to 1 for optimal window entry later
+                    result.optimal_window = 0
                     self.Results.append(result)
                     mom_high += self.momentum_Bin_width
                 mom_low += self.momentum_Bin_width
@@ -808,8 +808,8 @@ class YieldFunctions:
                     temp_BF_UL = self.Results[i].BF_UL
 
             self.Results[temp_index].optimal_window=1 # set flag to 1 for the entry with the optimal window
-            print("Optimal")
-            self.Results[temp_index].PrintResults()
+#            print("Optimal")
+#            self.Results[temp_index].PrintResults()
 
         def WriteHistograms(self):
             """function to make TTree"""

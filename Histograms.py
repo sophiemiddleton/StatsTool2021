@@ -55,3 +55,11 @@ class Histograms :
         for i, j in enumerate(data):
             dio_weight =  dio.DIOWeight(j)
             histogram.Fill(j, dio_weight / 7.91001e-10 )
+
+    def FillGenHistogramROOT(self, CEfile, DIOfile, RPCintfile, RPCextfile, Cosmicsfile=False):
+        ## TODO:
+        return 0
+        
+    def FillRecoHistogramROOT(self, CEfile, DIOfile, RPCintfile, RPCextfile, Cosmicsfile=False):
+        ## TODO:
+        return 0

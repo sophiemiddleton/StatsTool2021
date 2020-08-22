@@ -1,4 +1,8 @@
-#TODO:
+#!/usr/bin/python
+# Author: S Middleton
+# Date: 2020
+# Purpose: For exotic mu-->e+X study
+
 
 class YieldFunctions:
 
@@ -64,6 +68,6 @@ class YieldFunctions:
             return efficiency_error
 
         def GetExpectedYield(self, mom_low, mom_high, eff):
-            N_expected = self.GetPOT() * self.MuonStopsPerPOT() * self.Mu2eXBF() *  eff
-            N_expected_error = 0
+            N_expected = self.GetPOT() * self.MuonStopsPerPOT() * self.Mu2eXBF() * self.CapturesPerStop() * eff
+            N_expected_error = 0 #TODO
             return N_expected, N_expected_error
