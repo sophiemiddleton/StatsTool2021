@@ -44,8 +44,8 @@ def UsePandas(nbins, mom_low, mom_high,):
     histos.DoDIOWeights(histos.histo_DIO_reconstructed_reweighted , DIO_reco_mom)
 
     # Fill Gen:
-    DIO_gen_mom = gendata.GetFeature("DIO", "TreeMom")
-    CE_gen_mom = gendata.GetFeature("CE", "TreeMom")
+    DIO_gen_mom = gendata.GetFeature("DIO", "TMom")
+    CE_gen_mom = gendata.GetFeature("CE", "TMom")
     #DIO_gen_mom = recodata.GetMagFeature("DIO", "demcgen.momx", "demcgen.momx", "demcgen.momx")
     #CE_gen_mom = recodata.GetMagFeature("CE", "demcgen.momx", "demcgen.momx", "demcgen.momx")
     # Fill Gen Hists:
@@ -65,7 +65,8 @@ def UsePandas(nbins, mom_low, mom_high,):
     yields = YieldFunctions(histos, nbins, mom_low, mom_high, options.RPCintReco, options.RPCextReco, showRPC)
 
     # Fill Results
-    #yields.FillResults()
+    yields.FillResults()
+    yields.WriteHistograms()
     yields.GetSingleResult(103,105)
 
 def UseROOT(bins, mom_low, mom_high,):
@@ -81,7 +82,7 @@ def UseROOT(bins, mom_low, mom_high,):
 
     # Build Functions:
     stats = StatsFunctions()
-    yields = YieldFunctions(histos, nbins, mom_low, mom_high, options.RPCintReco, options.RPCextReco, showRPC)
+    yields = YieldFunctions(histos, nbins, mom_low, mom_high, options.RPCintReco, options.RPCextReco, options.target, showRPC)
 
     # Fill Results
     #yields.FillResults()
@@ -118,7 +119,7 @@ if __name__ == "__main__":
     parser.add_option('-k','--RPCextGen', dest='RPCextGen', default = 'RPCGen.root',help='NTuple with RPC', metavar='Rpcdir')
     parser.add_option('-u','--RPCintGen', dest='RPCintGen', default = 'RPCGen.root',help='NTuple with RPC', metavar='Rpcdir')
     parser.add_option('-c','--Cosmics', dest='Cosmics', default = 'False',help='NTuple with Cosmics', metavar='Cosmicsdir')
-
+    parser.add_option('-s','--target', dest='target', default = 'mu2e',help='target', metavar='stopsdir')
     parser.add_option('--tag', dest='tag', default = '1',help='file tag', metavar='tag')
 
     (options, args) = parser.parse_args()

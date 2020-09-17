@@ -38,6 +38,10 @@ class ImportRecoData :
             input_file = uproot.open(self.RPCintFileName)
             input_tree = input_file[self.TreeName][self.BranchName]
             df = input_tree.pandas.df(flatten=flatten)
+        if process == "Cosmics":
+            input_file = uproot.open(self.CosmicsFileName)
+            input_tree = input_file[self.TreeName][self.BranchName]
+            df = input_tree.pandas.df(flatten=flatten)
         return df
 
     def GetFeature(self, process, feature, flatten=False ):
@@ -51,6 +55,8 @@ class ImportRecoData :
             filename = self.RPCextFileName
         if process == "RPCint":
             filename = self.RPCintFileName
+        if process == "Cosmics":
+            filename = self.CosmicsFileName
         input_file = uproot.open(filename)
         input_tree = input_file[self.TreeName][self.BranchName]
         df = input_tree.pandas.df(flatten=flatten)
@@ -67,6 +73,8 @@ class ImportRecoData :
             filename = self.RPCextFileName
         if process == "RPCint":
             filename = self.RPCintFileName
+        if process == "Cosmics":
+            filename = self.CosmicsFileName
         input_file = uproot.open(filename)
         input_tree = input_file[self.TreeName][self.BranchName]
         df = input_tree.pandas.df(flatten=flatten)

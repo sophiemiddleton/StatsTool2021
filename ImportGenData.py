@@ -38,6 +38,10 @@ class ImportGenData :
             input_file = uproot.open(self.RPCintFileName)
             input_tree = input_file[self.TreeName][self.BranchName]
             df = input_tree.pandas.df(flatten=flatten)
+        if process == "Cosmics":
+            input_file = uproot.open(self.CosmicsFileName)
+            input_tree = input_file[self.TreeName][self.BranchName]
+            df = input_tree.pandas.df(flatten=flatten)
         return df
 
     def GetFeature(self, process, feature, flatten=False ):
@@ -51,6 +55,8 @@ class ImportGenData :
             filename = self.RPCextFileName
         if process == "RPCint":
             filename = self.RPCintFileName
+        if process == "Cosmics":
+            filename = self.Cosmics.FileName
         input_file = uproot.open(filename)
         input_tree = input_file[self.TreeName][self.BranchName]
         df = input_tree.pandas.df(flatten=flatten)
@@ -67,6 +73,8 @@ class ImportGenData :
             filename = self.RPCextFileName
         if process == "RPCint":
             filename = self.RPCintFileName
+        if process == "Cosmics":
+            filename = self.CosmicsFileName
         input_file = uproot.open(filename)
         input_tree = input_file[self.TreeName][self.BranchName]
         df = input_tree.pandas.df(flatten=flatten)
@@ -77,11 +85,3 @@ class ImportGenData :
             fz = df[feature_z][i]
             df_tot.append(math.sqrt(fx*fx+fy*fy+fz*fz))
         return df_tot
-
-    #TODO: Devloping this:
-    def ExportDataToCSV(self, filename, flatten = False):
-        """At some point we may want to use a CSV"""
-        file = uproot.open(filename) #TODO
-        electrons = file[self.TreeName][self.BranchName]
-        df = electrons.pandas.df(flatten = flatten)
-        df.to_csv("df.csv", index = False)
