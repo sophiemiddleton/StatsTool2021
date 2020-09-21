@@ -502,7 +502,7 @@ class YieldFunctions:
             if target == 'screenhole':
                 self.sim_eff = 0.84
                 self.muonstopsperPOT = 0.00144977
-            print("..........",self.muonstopsperPOT)
+        
             self.Histos = histos
             self.Results = []
             self.DIO = DIO()
