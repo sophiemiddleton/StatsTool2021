@@ -62,13 +62,13 @@ def UsePandas(nbins, mom_low, mom_high,):
 
     # Build Functions:
     stats = StatsFunctions()
-    yields = YieldFunctions(histos, nbins, mom_low, mom_high, options.RPCintReco, options.RPCextReco, showRPC)
+    yields = YieldFunctions(histos, nbins, mom_low, mom_high, options.RPCintReco, options.RPCextReco, options.target, showRPC)
 
     # Fill Results
-    yields.FillResults()
-    yields.WriteHistograms()
-    yields.GetSingleResult(103,105)
+    #yields.FillResults()
 
+    yields.GetSingleResult(103,105)
+    yields.WriteHistograms()
 def UseROOT(bins, mom_low, mom_high,):
     #Pass the .root TH1F's to histograms directly
     histos = Histograms(nbins, mom_low, mom_high,)

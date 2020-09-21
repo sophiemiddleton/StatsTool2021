@@ -472,27 +472,37 @@ class YieldFunctions:
             self.POT = 3.6e20
             self.capturesperStop = 0.609
             self.decaysperStop = 0.391
-            #if target == 'mu2e':
-                #self.muonstopsperPOT = 0.001525
-                #self.sim_eff = 0.6
-            #if target == '42foils':
-                #self.muonstopsperPOT = 0.001684
-                #self.sim_eff = 0.7
-            #if target == 'hex':
-                #self.muonstopsperPOT = 0.00126
-            #if target == 'cylindermesh':
-                #self.muonstopsperPOT = 0.00141761
-            #if target == 'screenhole':
-                #self.sim_eff = 0.67
-                #self.muonstopsperPOT = 0.00155165
-            #if target == 'cylinderdefault':
-                #self.sim_eff = 0.69
-                #self.muonstopsperPOT = 0.00141536
-            #if target == 'screenmesh':
-            self.sim_eff = 0.82
-            self.muonstopsperPOT = 0.00158792
-
-            self.sim_eff = 0.72
+            self.muonstopsperPOT = 0.001525
+            self.sim_eff = 1
+            self.target = target
+            if target == 'mu2e':
+                self.muonstopsperPOT = 0.001525
+                self.sim_eff = 0.6
+            if target == '42foils':
+                self.muonstopsperPOT = 0.001684
+                self.sim_eff = 0.7
+            if target == 'hex':
+                self.muonstopsperPOT = 0.00126
+                self.sim_eff = 0.6
+            if target == 'cylindermesh':
+                self.muonstopsperPOT = 0.00141761
+                self.sim_eff = 0.67
+            if target == 'screendefault':
+                self.sim_eff = 0.67
+                self.muonstopsperPOT = 0.00155165
+            if target == 'cylinderdefault':
+                self.sim_eff = 0.69
+                self.muonstopsperPOT = 0.00141536
+            if target == 'screenmesh':
+                self.sim_eff = 0.82
+                self.muonstopsperPOT = 0.00158792
+            if target == 'screenholemesh':
+                self.sim_eff = 0.70
+                self.muonstopsperPOT = 0.00151225
+            if target == 'screenhole':
+                self.sim_eff = 0.84
+                self.muonstopsperPOT = 0.00144977
+            print("..........",self.muonstopsperPOT)
             self.Histos = histos
             self.Results = []
             self.DIO = DIO()
@@ -558,7 +568,8 @@ class YieldFunctions:
             return Nrec_error
 
         def GetRecoEff(self, Nrec, Ngen):
-            efficiency = Nrec / Ngen
+            efficiency = (Nrec/self.GetSimEff()) / Ngen
+            print("rec, gen", Nrec,Ngen)
             return efficiency
 
         def GetRecoEffError(self, Nrec, Ngen):
@@ -581,13 +592,14 @@ class YieldFunctions:
 
         def GetSES(self, efficiency_CE):
             # calculate single event sensitivity (SES), corresponds to branching fraction where 1 signal event is observed
-        	SES = 1. / ( self.GetPOT() * self.MuonStopsPerPOT() * self.CapturesPerStop() * efficiency_CE * self.GetSimEff() )
-        	return SES
+            SES = 1. / ( self.GetPOT() * self.MuonStopsPerPOT() * self.CapturesPerStop() * efficiency_CE  )
+            print(self.GetPOT() , self.MuonStopsPerPOT() , self.CapturesPerStop() , efficiency_CE)
+            return SES
 
         def GetSESError(self, efficiency_CE, efficiency_error_CE):
             # calculate error of single event sensitivity (SES),
             #corresponds to uncertainting on branching fraction where 1 signal event is observed
-            SES = 1. / ( self.GetPOT() * self.MuonStopsPerPOT() * self.CapturesPerStop() * pow(efficiency_CE, 2) ) * efficiency_error_CE * self.GetSimEff() # error propagation on SES calculation
+            SES = 1. / ( self.GetPOT() * self.MuonStopsPerPOT() * self.CapturesPerStop() * pow(efficiency_CE, 2) ) * efficiency_error_CE * self.GetSimEff()  # error propagation on SES calculation
             return SES
 
         def GetDIOExpectedYield(self, N_DIO_rec, N_DIO_gen, efficiency_error_DIO, mom_low, mom_high):
@@ -839,10 +851,18 @@ class YieldFunctions:
 
         def WriteHistograms(self):
             """function to make TTree"""
-            c=TCanvas()
-            c.Divide(2,2)
-            c.cd(1)
+            c_dio=TCanvas()
+            c_dio.Divide(2,2)
+            c_dio.cd(1)
             self.Histos.histo_DIO_generated_reweighted.Draw('HIST')
-            c.cd(2)
+            c_dio.cd(2)
             self.Histos.histo_DIO_reconstructed_reweighted.Draw('HIST')
-            c.SaveAs("DIO.root")
+            c_dio.SaveAs("DIO."+str(self.target)+".root")
+
+            c_signal=TCanvas()
+            c_signal.Divide(2,2)
+            c_signal.cd(1)
+            self.Histos.histo_CE_generated.Draw('HIST')
+            c_signal.cd(2)
+            self.Histos.histo_CE_reconstructed.Draw('HIST')
+            c_signal.SaveAs("CE."+str(self.target)+".root")
