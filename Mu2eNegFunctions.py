@@ -444,6 +444,7 @@ class StatsFunctions :
     def GetFeldmanCousinsSensitivity(self, background_mean):
         size = len(self.FeldmanCousins_sensitivityValues)
         if (background_mean < 10): # have only values up to 10 background events in table, will not work for wide DIO spectrum
+                print("DIO FC for n = ", background_mean)
                 nb        = 2001
                 bInterval = 0.005
                 background_mean_rounded_array_index = TMath.Nint(background_mean / bInterval)
@@ -473,36 +474,38 @@ class YieldFunctions:
             self.capturesperStop = 0.609
             self.decaysperStop = 0.391
             self.muonstopsperPOT = 0.001525
-            self.sim_eff = 1
+            self.sim_ce_eff = 1
+            self.sim_dio_eff = 1
             self.target = target
             if target == 'mu2e':
                 self.muonstopsperPOT = 0.001525
-                self.sim_eff = 0.6
+                self.sim_ce_eff = 0.6
+                self.sim_dio_eff = 0.6
             if target == '42foils':
                 self.muonstopsperPOT = 0.001684
-                self.sim_eff = 0.7
+                self.sim_ce_eff = 0.7
             if target == 'hex':
                 self.muonstopsperPOT = 0.00126
-                self.sim_eff = 0.6
+                self.sim_ce_eff = 0.6
             if target == 'cylindermesh':
                 self.muonstopsperPOT = 0.00141761
-                self.sim_eff = 0.67
+                self.sim_ce_eff = 0.67
             if target == 'screendefault':
-                self.sim_eff = 0.67
+                self.sim_ce_eff = 0.67
                 self.muonstopsperPOT = 0.00155165
             if target == 'cylinderdefault':
-                self.sim_eff = 0.69
+                self.sim_ce_eff = 0.69
                 self.muonstopsperPOT = 0.00141536
             if target == 'screenmesh':
-                self.sim_eff = 0.82
+                self.sim_ce_eff = 0.82
                 self.muonstopsperPOT = 0.00158792
             if target == 'screenholemesh':
-                self.sim_eff = 0.70
+                self.sim_ce_eff = 0.70
                 self.muonstopsperPOT = 0.00151225
             if target == 'screenhole':
-                self.sim_eff = 0.84
+                self.sim_ce_eff = 0.84
                 self.muonstopsperPOT = 0.00144977
-        
+
             self.Histos = histos
             self.Results = []
             self.DIO = DIO()
@@ -542,8 +545,11 @@ class YieldFunctions:
         def MuonStopsPerPOT(self):
             return self.muonstopsperPOT
 
-        def GetSimEff(self):
-            return self.sim_eff
+        def GetCESimEff(self):
+            return self.sim_ce_eff
+
+        def GetDIOSimEff(self):
+            return self.sim_dio_eff
 
         def GetIntegral(self, histo, mom_low, mom_high):
             # Translate mom_low and mom_up in bin numbers
@@ -568,7 +574,7 @@ class YieldFunctions:
             return Nrec_error
 
         def GetRecoEff(self, Nrec, Ngen):
-            efficiency = (Nrec/self.GetSimEff()) / Ngen
+            efficiency = (Nrec/self.GetCESimEff()) / Ngen
             print("rec, gen", Nrec,Ngen)
             return efficiency
 
@@ -586,7 +592,7 @@ class YieldFunctions:
 
         def GetSignalExpectedYield(self, efficiency_CE):
             # assume BF of 10E-16 and calculate expected signal for this BF
-            BF_assumption=1e-16
+            BF_assumption = 1e-16
             N_CE_expected = self.GetPOT() * self.MuonStopsPerPOT() * self.CapturesPerStop() * BF_assumption * efficiency_CE
             return N_CE_expected
 
@@ -599,7 +605,7 @@ class YieldFunctions:
         def GetSESError(self, efficiency_CE, efficiency_error_CE):
             # calculate error of single event sensitivity (SES),
             #corresponds to uncertainting on branching fraction where 1 signal event is observed
-            SES = 1. / ( self.GetPOT() * self.MuonStopsPerPOT() * self.CapturesPerStop() * pow(efficiency_CE, 2) ) * efficiency_error_CE * self.GetSimEff()  # error propagation on SES calculation
+            SES = 1. / ( self.GetPOT() * self.MuonStopsPerPOT() * self.CapturesPerStop() * pow(efficiency_CE, 2) ) * efficiency_error_CE  # error propagation on SES calculation
             return SES
 
         def GetDIOExpectedYield(self, N_DIO_rec, N_DIO_gen, efficiency_error_DIO, mom_low, mom_high):
@@ -667,13 +673,15 @@ class YieldFunctions:
             result.efficiency_DIO = self.GetRecoEff(result.N_DIO_rec,result.N_DIO_gen)
             result.efficiency_error_DIO = self.GetDIOEffError(result.N_DIO_rec, result.N_DIO_rec_error, result.N_DIO_gen, result.N_DIO_gen_error);
             result.N_DIO_expected, result.N_DIO_expected_error = self.GetDIOExpectedYield(result.N_DIO_rec,result.N_DIO_gen, result.efficiency_error_DIO,mom_low, mom_high)
+            if(result.N_DIO_expected > 9):
+                result.N_DIO_expected = 9
             result.Nsig_UL = stats.GetFeldmanCousinsSensitivity(result.N_DIO_expected)
-            result.Nsig_UL_error = 999
-            if (result.Nsig_UL != 999):
+            #result.Nsig_UL_error = 999
+            #if (result.Nsig_UL != 999):
 
-                temp_Nsig_UL_error_lower = result.Nsig_UL - stats.GetFeldmanCousinsSensitivity(result.N_DIO_expected - result.N_DIO_expected_error) #TODO - add RPC/Cosmics
-                temp_Nsig_UL_error_upper = stats.GetFeldmanCousinsSensitivity(result.N_DIO_expected + result.N_DIO_expected_error) - result.Nsig_UL
-                result.Nsig_UL_error = max(temp_Nsig_UL_error_lower, temp_Nsig_UL_error_upper) # take maximum of errors to avoid asymmetric errors on Nsig_UL
+            temp_Nsig_UL_error_lower = result.Nsig_UL - stats.GetFeldmanCousinsSensitivity(result.N_DIO_expected - result.N_DIO_expected_error) #TODO - add RPC/Cosmics
+            temp_Nsig_UL_error_upper = stats.GetFeldmanCousinsSensitivity(result.N_DIO_expected + result.N_DIO_expected_error) - result.Nsig_UL
+            result.Nsig_UL_error = max(temp_Nsig_UL_error_lower, temp_Nsig_UL_error_upper) # take maximum of errors to avoid asymmetric errors on Nsig_UL
 
             if(result.efficiency_CE !=0 and result.efficiency_error_CE!=0):
                 result.BF_UL = self.GetBFUL(result.Nsig_UL,result.efficiency_CE);
@@ -738,6 +746,7 @@ class YieldFunctions:
                     if (math.isnan(result.N_DIO_gen_error)):
                         break
                     result.N_DIO_rec = self.GetN(self.Histos.histo_DIO_reconstructed_reweighted , mom_low, mom_high)
+                    result.N_DIO_rec = result.N_DIO_rec/self.GetDIOSimEff()
                     if (math.isnan(result.N_DIO_rec)):
                         break
 
@@ -803,14 +812,16 @@ class YieldFunctions:
                         result.SES_error =  0
                     if (math.isnan(result.SES) or math.isnan(result.SES_error)):
                         break
-
+                    if(result.N_DIO_expected > 10):
+                        result.N_DIO_expected = 10
                     result.Nsig_UL = stats.GetFeldmanCousinsSensitivity(result.N_DIO_expected) #TODO + result.N_intRPCs_expected + result.N_extRPCs_expected)
                     if (math.isnan(result.Nsig_UL)):
                         break
-                    print("Expected DIO", result.N_DIO_expected , result.N_DIO_expected_error)
+                    print("Expected DIO", result.N_DIO_expected , result.N_DIO_expected_error, result.Nsig_UL)
                     # calculate error on Nsig_UL by calculation of the Feldman-Cousins sensitivity of N_DIO_expected - 1*sigma and N_DIO_expected + 1*sigma, take maximum of both values
                     result.Nsig_UL_error = 999
-                    print("SIG UL", result.Nsig_UL)
+                    if(result.N_DIO_expected > 9):
+                        result.N_DIO_expected = 9
                     if (result.Nsig_UL != 999):
 
                         temp_Nsig_UL_error_lower = result.Nsig_UL - stats.GetFeldmanCousinsSensitivity(result.N_DIO_expected - result.N_DIO_expected_error)
