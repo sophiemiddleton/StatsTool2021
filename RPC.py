@@ -9,7 +9,7 @@ import pandas
 
 class RPC() :
 
-    def __init__(self, histos,intfile,extfile, min, max, livegate, treename="TrkAnaNeg", branchname="trkana"):
+    def __init__(self, histos,intfile,extfile, min, max, livegate, target, treename="TrkAnaNeg", branchname="trkana"):
         self.process = "RPC"
         self.POT = 1e8
         self.frpc = 0.0215
@@ -24,6 +24,27 @@ class RPC() :
         self.RecoEffExt = 0
         self.Ngen_int  = 1e8
         self.Ngen_ext = 1e9
+        self.pions = "../RPC/Pionsv2.root"
+        
+        if target == 'mu2e':
+            self.pions = "../RPC/Pionsv2.root"
+        if target == '42foils':
+            self.pions = "../StatsTool_Data/StoppedPions/StoppingTarget_42Foils_Pions.root"
+        if target == 'hex':
+            self.pions = "../StatsTool_Data/StoppedPions/StoppingTarget_Hex_Pions.root"
+        if target == 'cylindermesh':
+            self.pions = "../StatsTool_Data/StoppedPions/StopTarget_CylinderMesh_Pions.root"
+        if target == 'screendefault':
+            self.pions = "../StatsTool_Data/StoppedPions/StoppingTarget_ScreenDefault_Pions.root"
+        if target == 'cylinderdefault':
+            self.pions = "../StatsTool_Data/StoppedPions/StopTarget_CylinderDefault_Pions.root"
+        if target == 'screenmesh':
+            self.pions = "../StatsTool_Data/StoppedPions/StoppingTarget_MeshScreen_Pions.root"
+        if target == 'screenholemesh':
+            self.pions = "../StatsTool_Data/StoppedPions/StoppingTarget_SHM_Pions.root"
+        if target == 'screenhole':
+            self.pions = "../StatsTool_Data/StoppedPions/StoppingTarget_ScreenHole_Pions.root"
+        print(target, self.pions)
         # Fill Sums in Signal Regions:
 
         input_file_int = uproot.open(intfile)
@@ -41,7 +62,7 @@ class RPC() :
         print("sum of RPC weights in sig", self.SumofSigWeightsInt, self.SumofSigWeightsExt)
 
         # Extract Pion Weights:
-        file = uproot.open("../RPC/Pionsv2.root")
+        file = uproot.open(self.pions)
         Pions = file["stoppedPionDumper;1"]["stops;1"]
         df = Pions.pandas.df(flatten=False)
         for i,j in enumerate(df["stops.tauNormalized"]):
@@ -52,7 +73,7 @@ class RPC() :
 
     def SumPionWeights(self):
         self.sumPionWeights = 0
-        file = uproot.open("../RPC/Pionsv2.root")
+        file = uproot.open(self.pions)
         Pions = file["stoppedPionDumper;1"]["stops;1"]
         df = Pions.pandas.df(flatten=False)
         for i,j in enumerate(df["stops.tauNormalized"]):

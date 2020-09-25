@@ -484,32 +484,40 @@ class YieldFunctions:
             if target == '42foils':
                 self.muonstopsperPOT = 0.001684
                 self.sim_ce_eff = 0.7
+                self.sim_dio_eff = 0.7
             if target == 'hex':
                 self.muonstopsperPOT = 0.00126
                 self.sim_ce_eff = 0.6
+                self.sim_dio_eff = 0.76
             if target == 'cylindermesh':
                 self.muonstopsperPOT = 0.00141761
                 self.sim_ce_eff = 0.67
+                self.sim_dio_eff = 0.54
             if target == 'screendefault':
                 self.sim_ce_eff = 0.67
+                self.sim_dio_eff = 0.84
                 self.muonstopsperPOT = 0.00155165
             if target == 'cylinderdefault':
                 self.sim_ce_eff = 0.69
+                self.sim_dio_eff = 0.7
                 self.muonstopsperPOT = 0.00141536
             if target == 'screenmesh':
                 self.sim_ce_eff = 0.82
+                self.sim_dio_eff = 0.65
                 self.muonstopsperPOT = 0.00158792
             if target == 'screenholemesh':
                 self.sim_ce_eff = 0.70
+                self.sim_dio_eff = 0.65
                 self.muonstopsperPOT = 0.00151225
             if target == 'screenhole':
                 self.sim_ce_eff = 0.84
+                self.sim_dio_eff = 0.77
                 self.muonstopsperPOT = 0.00144977
-
+            print("main", target, self.sim_ce_eff, self.muonstopsperPOT)
             self.Histos = histos
             self.Results = []
             self.DIO = DIO()
-            self.RPC = RPC(self.Histos,rpc_filename_int, rpc_filename_ext, self.momentum_lower_limit,self.momentum_upper_limit, self.livegate)
+            self.RPC = RPC(self.Histos,rpc_filename_int, rpc_filename_ext, self.momentum_lower_limit,self.momentum_upper_limit, self.livegate, target)
             self.CE = CE()
 
         def MomLowLimit(self):
@@ -573,8 +581,8 @@ class YieldFunctions:
             Nrec_error = math.sqrt(temp_error_sum)
             return Nrec_error
 
-        def GetRecoEff(self, Nrec, Ngen):
-            efficiency = (Nrec/self.GetCESimEff()) / Ngen
+        def GetRecoEff(self, Nrec, Ngen, simeff):
+            efficiency = (Nrec/simeff) / Ngen
             print("rec, gen", Nrec,Ngen)
             return efficiency
 
@@ -652,7 +660,7 @@ class YieldFunctions:
             result.momentum_high = mom_high
             result.N_CE_gen =  self.Histos.histo_CE_generated.GetEntries()
             result.N_CE_rec = self.GetN(self.Histos.histo_CE_reconstructed , mom_low, mom_high)
-            result.efficiency_CE = self.GetRecoEff(result.N_CE_rec,result.N_CE_gen)
+            result.efficiency_CE = self.GetRecoEff(result.N_CE_rec,result.N_CE_gen, self.GetCESimEff())
             result.efficiency_error_CE = self.GetRecoEffError(result.N_CE_rec,result.N_CE_gen)
             result.N_CE_expected = self.GetSignalExpectedYield(result.efficiency_CE)
             result.N_CE_expected_error = self.GetSignalExpectedYield(result.efficiency_error_CE)
@@ -661,16 +669,18 @@ class YieldFunctions:
             result.N_DIO_gen = self.GetN(self.Histos.histo_DIO_generated_reweighted, mom_low, mom_high)
             result.N_DIO_gen_error = self.GetNError(self.Histos.histo_DIO_generated_reweighted,mom_low, mom_high)
             result.N_DIO_rec = self.GetN(self.Histos.histo_DIO_reconstructed_reweighted , mom_low, mom_high)
+            result.efficiency_DIO = self.GetRecoEff(result.N_DIO_rec,result.N_DIO_gen, self.GetDIOSimEff())
+            result.N_DIO_rec = result.N_DIO_rec/self.GetDIOSimEff()
             result.N_intRPC_rec = self.GetN(self.Histos.histo_intRPC_reconstructed, mom_low, mom_high)
             result.N_intRPC_gen = self.GetN(self.Histos.histo_intRPC_generated, mom_low, mom_high)
             result.N_extRPC_rec = self.GetN(self.Histos.histo_extRPC_reconstructed,mom_low, mom_high)
             result.N_extRPC_gen = self.GetN(self.Histos.histo_extRPC_generated, mom_low, mom_high)
-            result.efficiency_intRPC = self.GetRecoEff(result.N_intRPC_rec, result.N_intRPC_gen)
+            result.efficiency_intRPC = self.GetRecoEff(result.N_intRPC_rec, result.N_intRPC_gen, 1)
             self.GetInternalRPCExpectedYield(result.N_intRPCs_expected, result.N_intRPCs_expected_error, mom_low, mom_high, result.efficiency_intRPC)
-            result.efficiency_extRPC = self.GetRecoEff(result.N_extRPC_rec, result.N_extRPC_gen)
+            result.efficiency_extRPC = self.GetRecoEff(result.N_extRPC_rec, result.N_extRPC_gen, 1)
             self.GetExternalRPCExpectedYield(result.N_extRPCs_expected, result.N_extRPCs_expected_error, mom_low, mom_high, result.efficiency_extRPC)
             result.N_DIO_rec_error = self.GetNError(self.Histos.histo_DIO_reconstructed_reweighted, mom_low, mom_high)
-            result.efficiency_DIO = self.GetRecoEff(result.N_DIO_rec,result.N_DIO_gen)
+
             result.efficiency_error_DIO = self.GetDIOEffError(result.N_DIO_rec, result.N_DIO_rec_error, result.N_DIO_gen, result.N_DIO_gen_error);
             result.N_DIO_expected, result.N_DIO_expected_error = self.GetDIOExpectedYield(result.N_DIO_rec,result.N_DIO_gen, result.efficiency_error_DIO,mom_low, mom_high)
             if(result.N_DIO_expected > 9):
@@ -714,7 +724,7 @@ class YieldFunctions:
                         break
 
                     if(result.N_CE_gen !=0):
-                        result.efficiency_CE = self.GetRecoEff(result.N_CE_rec,result.N_CE_gen)
+                        result.efficiency_CE = self.GetRecoEff(result.N_CE_rec,result.N_CE_gen, self.GetCESimEff())
                     else:
                         result.efficiency_CE = 1
                     if (math.isnan(result.efficiency_CE)):
@@ -771,7 +781,7 @@ class YieldFunctions:
                             break
 
                         if( result.N_intRPC_gen !=0):
-                            result.efficiency_intRPC = self.GetRecoEff(result.N_intRPC_rec, result.N_intRPC_gen)
+                            result.efficiency_intRPC = self.GetRecoEff(result.N_intRPC_rec, result.N_intRPC_gen, 1)
                         else:
                             result.efficiency_intRPC = 1
 
@@ -780,7 +790,7 @@ class YieldFunctions:
                             break
 
                         if(result.N_extRPC_gen !=0):
-                            result.efficiency_extRPC = self.GetRecoEff(result.N_extRPC_rec, result.N_extRPC_gen)
+                            result.efficiency_extRPC = self.GetRecoEff(result.N_extRPC_rec, result.N_extRPC_gen, 1)
                         else:
                             result.efficiency_extRPC = 1
 
@@ -792,7 +802,7 @@ class YieldFunctions:
                     if (math.isnan(result.N_DIO_rec_error)):
                         break
 
-                    result.efficiency_DIO = self.GetRecoEff(result.N_DIO_rec,result.N_DIO_gen)
+                    result.efficiency_DIO = self.GetRecoEff(result.N_DIO_rec,result.N_DIO_gen, 1)
                     if (math.isnan(result.efficiency_DIO)):
                         break
 
