@@ -478,7 +478,7 @@ class YieldFunctions:
             self.sim_dio_eff = 1
             self.target = target
             if target == 'mu2e':
-                self.muonstopsperPOT = 0.001525
+                self.muonstopsperPOT = 0.00153814
                 self.sim_ce_eff = 0.6
                 self.sim_dio_eff = 0.6
             if target == '42foils':
@@ -502,17 +502,18 @@ class YieldFunctions:
                 self.sim_dio_eff = 0.7
                 self.muonstopsperPOT = 0.00141536
             if target == 'screenmesh':
-                self.sim_ce_eff = 0.82
-                self.sim_dio_eff = 0.65
-                self.muonstopsperPOT = 0.00158792
+                self.sim_ce_eff = 0.63
+                self.sim_dio_eff = 0.49
+                self.muonstopsperPOT = 0.00155841
             if target == 'screenholemesh':
                 self.sim_ce_eff = 0.70
                 self.sim_dio_eff = 0.65
                 self.muonstopsperPOT = 0.00151225
             if target == 'screenhole':
-                self.sim_ce_eff = 0.84
+                self.sim_ce_eff = 0.62
                 self.sim_dio_eff = 0.77
-                self.muonstopsperPOT = 0.00144977
+                self.muonstopsperPOT = 0.00151086
+
             print("main", target, self.sim_ce_eff, self.muonstopsperPOT)
             self.Histos = histos
             self.Results = []

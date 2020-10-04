@@ -87,7 +87,7 @@ def UseROOT(bins, mom_low, mom_high,):
 
     # Fill Results
     #yields.FillResults()
-    yields.GetSingleResult(103,105)
+    yields.GetSingleResult(103.75,105)
 
 def plot1DHist(file_name, tree_name, branch_name, feature_name):
     """ Basic funciton to make a plot of a feature """
