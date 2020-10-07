@@ -479,8 +479,10 @@ class YieldFunctions:
             self.target = target
             if target == 'mu2e':
                 self.muonstopsperPOT = 0.00153814
-                self.sim_ce_eff = 0.6
-                self.sim_dio_eff = 0.6
+                #self.sim_ce_eff = 0.6
+                #self.sim_dio_eff = 0.6
+                self.sim_ce_eff = 0.16
+                self.sim_dio_eff = 0.47
             if target == '42foils':
                 self.muonstopsperPOT = 0.001684
                 self.sim_ce_eff = 0.7
@@ -506,8 +508,10 @@ class YieldFunctions:
                 self.sim_dio_eff = 0.49
                 self.muonstopsperPOT = 0.00155841
             if target == 'screenholemesh':
-                self.sim_ce_eff = 0.70
-                self.sim_dio_eff = 0.65
+                #self.sim_ce_eff = 0.70
+                #self.sim_dio_eff = 0.65
+                self.sim_ce_eff = 0.48
+                self.sim_dio_eff = 0.74
                 self.muonstopsperPOT = 0.00151225
             if target == 'screenhole':
                 self.sim_ce_eff = 0.62
