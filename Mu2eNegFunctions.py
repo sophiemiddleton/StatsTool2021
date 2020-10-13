@@ -481,27 +481,37 @@ class YieldFunctions:
                 self.muonstopsperPOT = 0.00153814
                 #self.sim_ce_eff = 0.6
                 #self.sim_dio_eff = 0.6
-                self.sim_ce_eff = 0.16
+                self.sim_ce_eff = 0.77
                 self.sim_dio_eff = 0.47
             if target == '42foils':
                 self.muonstopsperPOT = 0.001684
-                self.sim_ce_eff = 0.7
-                self.sim_dio_eff = 0.7
+                #self.sim_ce_eff = 0.7
+                #self.sim_dio_eff = 0.7
+                self.sim_ce_eff = 0.67
+                self.sim_dio_eff = 0.64
             if target == 'hex':
                 self.muonstopsperPOT = 0.00126
-                self.sim_ce_eff = 0.6
-                self.sim_dio_eff = 0.76
+                #self.sim_ce_eff = 0.6
+                #self.sim_dio_eff = 0.76
+                self.sim_ce_eff = 0.35
+                self.sim_dio_eff = 0.48
             if target == 'cylindermesh':
                 self.muonstopsperPOT = 0.00141761
-                self.sim_ce_eff = 0.67
-                self.sim_dio_eff = 0.54
+                #self.sim_ce_eff = 0.67
+                #self.sim_dio_eff = 0.54
+                self.sim_ce_eff = 0.72
+                self.sim_dio_eff = 0.62
             if target == 'screendefault':
-                self.sim_ce_eff = 0.67
-                self.sim_dio_eff = 0.84
+                #self.sim_ce_eff = 0.67
+                #self.sim_dio_eff = 0.84
+                self.sim_ce_eff = 0.60
+                self.sim_dio_eff = 0.45
                 self.muonstopsperPOT = 0.00155165
             if target == 'cylinderdefault':
-                self.sim_ce_eff = 0.69
-                self.sim_dio_eff = 0.7
+                #self.sim_ce_eff = 0.69
+                #self.sim_dio_eff = 0.7
+                self.sim_ce_eff = 0.27
+                self.sim_dio_eff = 0.58
                 self.muonstopsperPOT = 0.00141536
             if target == 'screenmesh':
                 self.sim_ce_eff = 0.63
@@ -510,8 +520,10 @@ class YieldFunctions:
             if target == 'screenholemesh':
                 #self.sim_ce_eff = 0.70
                 #self.sim_dio_eff = 0.65
-                self.sim_ce_eff = 0.48
-                self.sim_dio_eff = 0.74
+                #self.sim_ce_eff = 0.48
+                #self.sim_dio_eff = 0.74
+                self.sim_ce_eff = 0.69
+                self.sim_dio_eff = 0.59
                 self.muonstopsperPOT = 0.00151225
             if target == 'screenhole':
                 self.sim_ce_eff = 0.62
