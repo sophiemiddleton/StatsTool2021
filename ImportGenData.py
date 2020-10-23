@@ -9,7 +9,7 @@ import math
 
 class ImportGenData :
 
-    def __init__(self, CEfileName, DIOfileName , RPCextfileName, RPCintfileName, CosmicsfileName=False, treeName = "generate", branchName = "GenTree"):
+    def __init__(self, CEfileName, DIOfileName , RPCextfileName=False, RPCintfileName=False, CosmicsfileName=False, treeName = "generate", branchName = "GenTree"):
         """ Initialise the Class Object """
         self.CEFileName= CEfileName
         self.DIOFileName= DIOfileName

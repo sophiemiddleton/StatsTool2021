@@ -83,3 +83,58 @@ class Results :
         print("SES", self.SES, "+/-",self.SES_error)
         print("Sig UL",self.Nsig_UL, "+/-", self.Nsig_UL_error)
         print("BFUL", self.BF_UL, "+/-", self.BF_UL_error )
+
+class ResultsMu2eX :
+
+    def __init__(self):
+        self.momentum_low = 0
+        self.momentum_high = 0
+
+        #Yields :
+        self.N_Mu2eX_gen = 0
+        self.N_Mu2eX_rec = 0
+        self.N_Mu2eX_expected = 0
+        self.N_Mu2eX_expected_error = 0
+
+        self.N_DIO_gen = 0
+        self.N_DIO_gen_error = 0
+        self.N_DIO_rec = 0
+        self.N_DIO_rec_error = 0
+        self.N_DIO_expected = 0
+        self.N_DIO_expected_error = 0
+
+        # Efficiencies:
+
+        self.efficiency_DIO = 0
+        self.efficiency_error_DIO = 0
+        self.efficiency_error_extRPC = 0
+
+        self.efficiency_Mu2eX = 0
+        self.efficiency_error_Mu2eX = 0
+
+        # StatsResults:
+        self.Nsig_UL = 0
+        self.Nsig_UL_error = 0
+        self.BF_UL = 0
+        self.BF_UL_error = 0
+        self.SES = 0
+        self.SES_error = 0
+        self.optimal_window = 0
+
+    def PrintResultsMu2eX(self):
+        """ prints the results to screen """
+        print("Mom Window Start",self.momentum_low)
+        print("Mom Window End", self.momentum_high)
+        print("NMu2eX Gen", self.N_Mu2eX_gen)
+        print("NMu2eX Reco", self.N_Mu2eX_rec)
+        print("Mu2eX Eff", self.efficiency_Mu2eX,  "+/-", self.efficiency_error_Mu2eX)
+        print("Mu2eX Expected", self.N_Mu2eX_expected, "+/-", self.N_Mu2eX_expected_error)
+
+        print("NDIO Gen", self.N_DIO_gen,  "+/-", self.N_DIO_gen_error)
+        print("NDIO Reco",self.N_DIO_rec, "+/-", self.N_DIO_rec_error)
+        print("NDIO Expected", self.N_DIO_expected, "+/-", self.N_DIO_expected_error)
+        print("DIO Eff", self.efficiency_DIO,  "+/-", self.efficiency_error_DIO)
+
+        print("SES", self.SES, "+/-",self.SES_error)
+        print("Sig UL",self.Nsig_UL, "+/-", self.Nsig_UL_error)
+        print("BFUL", self.BF_UL, "+/-", self.BF_UL_error )

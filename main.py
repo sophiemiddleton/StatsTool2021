@@ -21,7 +21,7 @@ def main(options, args):
     print("Importing Data from: CE", options.CEReco, options.CEGen, "DIO",
 options.DIOReco, options.DIOGen, "internal RPC", options.RPCintReco, options.RPCintGen,
 "external RPC", options.RPCextReco, options.RPCextGen, options.Cosmics)
-    UsePandas(400, 90., 110.)
+    UsePandas(400, 100, 110)
 
 def UsePandas(nbins, mom_low, mom_high,):
     recodata = ImportRecoData(options.CEReco, options.DIOReco, options.RPCextReco, options.RPCintReco)

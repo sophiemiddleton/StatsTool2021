@@ -470,7 +470,8 @@ class YieldFunctions:
             self.signal_start = 103.75
             self.signal_end = 105.45
             self.livegate = 700.
-            self.POT = 3.6e20
+            self.POT_CD3= 3.6e20
+            self.POT_Run1= 3.76e19
             self.capturesperStop = 0.609
             self.decaysperStop = 0.391
             self.muonstopsperPOT = 0.001525
@@ -510,9 +511,12 @@ class YieldFunctions:
             if target == 'cylinderdefault':
                 #self.sim_ce_eff = 0.69
                 #self.sim_dio_eff = 0.7
-                self.sim_ce_eff = 0.27
-                self.sim_dio_eff = 0.58
-                self.muonstopsperPOT = 0.00141536
+                #self.sim_ce_eff = 0.27
+                #self.sim_dio_eff = 0.58
+                #self.muonstopsperPOT = 0.00141536
+                self.sim_ce_eff = 0.49
+                self.sim_dio_eff = 0.45
+                self.muonstopsperPOT = 0.00104840
             if target == 'screenmesh':
                 self.sim_ce_eff = 0.63
                 self.sim_dio_eff = 0.49
@@ -559,7 +563,7 @@ class YieldFunctions:
             return self.signal_end
 
         def GetPOT(self):
-            return self.POT
+            return self.POT_CD3
 
         def CapturesPerStop(self):
             return self.capturesperStop
@@ -879,7 +883,7 @@ class YieldFunctions:
             temp_index = -1
             temp_BF_UL = 999
             for i, j in enumerate(self.Results):
-                if (self.Results[i].BF_UL < temp_BF_UL ):
+                if (self.Results[i].BF_UL < temp_BF_UL and self.Results[i].BF_UL!=0):
                     temp_index = i
                     temp_BF_UL = self.Results[i].BF_UL
 

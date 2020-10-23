@@ -9,7 +9,7 @@ import math
 
 class ImportRecoData :
 
-    def __init__(self, CEfileName, DIOfileName , RPCextfileName, RPCintfileName, CosmicsfileName=False, treeName = "TrkAnaNeg", branchName = "trkana"):
+    def __init__(self, CEfileName, DIOfileName , RPCextfileName=False, RPCintfileName=False, CosmicsfileName=False, treeName = "TrkAnaNeg", branchName = "trkana"):
         """ Initialise the Class Object """
         self.CEFileName= CEfileName
         self.DIOFileName= DIOfileName
