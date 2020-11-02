@@ -30,7 +30,7 @@ def UsePandas(nbins, mom_low, mom_high,):
     showRPC = options.showRPC
     #Get Data:
     DIO_reco_mom = recodata.GetFeature( "DIO", "deent.mom")
-    CE_reco_mom = recodata.GetFeature( "CE", "deent.mom")
+    CE_reco_mom = recodata.GetFeature( "signal", "deent.mom")
 
     # Fill Reco Hists:
     histos.FillHistogram(histos.histo_CE_reconstructed , CE_reco_mom)
@@ -41,13 +41,15 @@ def UsePandas(nbins, mom_low, mom_high,):
         histos.FillHistogram(histos.histo_extRPC_reconstructed , RPCext_reco_mom)
         histos.FillHistogram(histos.histo_intRPC_reconstructed , RPCint_reco_mom)
 
-    histos.DoDIOWeights(histos.histo_DIO_reconstructed_reweighted , DIO_reco_mom)
+    if options.target == 'Ti':
+        histos.DoDIOWeights_Ti(histos.histo_DIO_reconstructed_reweighted , DIO_reco_mom)
+    else:
+        histos.DoDIOWeights(histos.histo_DIO_reconstructed_reweighted , DIO_reco_mom)
 
     # Fill Gen:
     DIO_gen_mom = gendata.GetFeature("DIO", "TMom")
-    CE_gen_mom = gendata.GetFeature("CE", "TMom")
-    #DIO_gen_mom = recodata.GetMagFeature("DIO", "demcgen.momx", "demcgen.momx", "demcgen.momx")
-    #CE_gen_mom = recodata.GetMagFeature("CE", "demcgen.momx", "demcgen.momx", "demcgen.momx")
+    CE_gen_mom = gendata.GetFeature("signal", "TMom")
+    
     # Fill Gen Hists:
     histos.FillHistogram(histos.histo_CE_generated , CE_gen_mom)
     histos.FillHistogram(histos.histo_DIO_generated_flat , DIO_gen_mom)
@@ -58,14 +60,17 @@ def UsePandas(nbins, mom_low, mom_high,):
         histos.FillHistogram(histos.histo_intRPC_generated , RPCint_gen_mom)
         histos.FillHistogram(histos.histo_extRPC_generated , RPCext_gen_mom)
 
-    histos.DoDIOWeights(histos.histo_DIO_generated_reweighted , DIO_gen_mom)
+    if options.target=='Ti':
+        histos.DoDIOWeights_Ti(histos.histo_DIO_generated_reweighted , DIO_gen_mom)
+    else:
+        histos.DoDIOWeights(histos.histo_DIO_generated_reweighted , DIO_gen_mom)
 
     # Build Functions:
     stats = StatsFunctions()
     yields = YieldFunctions(histos, nbins, mom_low, mom_high, options.RPCintReco, options.RPCextReco, options.target, showRPC)
 
     # Fill Results
-    #yields.FillResults()
+    yields.FillResults()
 
     yields.GetSingleResult(103.75,105)
     yields.WriteHistograms()

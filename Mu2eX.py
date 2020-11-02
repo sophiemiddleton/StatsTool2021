@@ -29,7 +29,7 @@ class Mu2eX :
         a3 = 1.438e-3
         a4 = 2.419e-3
         a5 = 1.215e-1
-        delta = ((Emu - E - pow(E,2)/(2*mN))/mmu)
+        delta = ((emu - x - pow(x,2)/(2*mal))/mmu)
         if(delta > 0.0):
             return BR*(1/mmu)*(a0*pow(delta,1) + a1*pow(delta,2) + a2*pow(delta,3) + a3*pow(delta,4) + a4*pow(delta,5) + a5*pow(delta,6));
         else:
@@ -50,7 +50,8 @@ class Mu2eX :
         a2 = 1.027e-4;
         a3 = 1.438e-3;
         a4 = 2.419e-3;
-        a5 = 1.215e-1;`
+        a5 = 1.215e-1;
+        delta = ((emu - x - pow(x,2)/(2*mal))/mmu)
         if(delta > 0.0):
             return BR*(1/mmu)*(a0*pow(delta,1) + a1*pow(delta,2) + a2*pow(delta,3) + a3*pow(delta,4) + a4*pow(delta,5) + a5*pow(delta,6));
         else:
@@ -58,7 +59,7 @@ class Mu2eX :
 
     def GetMu2eXIntegral(self, mom_low, mom_high):
         _Mu2eXcz_f = TF1("_Mu2eXcz_f",self.Mu2eXcz, 100,110.,1)
-        _Mu2eXcz_f.SetParameter(0,1.0)
+        #_Mu2eXcz_f.SetParameter(0,1.0)
         return _Mu2eXcz_f.Integral(mom_low,mom_high)
 
     def GetInt(self,mom_low, mom_high):

@@ -472,48 +472,42 @@ class YieldFunctions:
             self.livegate = 700.
             self.POT_CD3= 3.6e20
             self.POT_Run1= 3.76e19
+            self.POT_mu2e2 = 5e22
             self.capturesperStop = 0.609
             self.decaysperStop = 0.391
             self.muonstopsperPOT = 0.001525
             self.sim_ce_eff = 1
             self.sim_dio_eff = 1
             self.target = target
+            if target == 'mu2e2':
+                self.muonstopsperPOT = 0.000090911
+                self.sim_ce_eff = 0.75
+                self.sim_dio_eff = 0.77
             if target == 'mu2e':
                 self.muonstopsperPOT = 0.00153814
-                #self.sim_ce_eff = 0.6
-                #self.sim_dio_eff = 0.6
                 self.sim_ce_eff = 0.77
                 self.sim_dio_eff = 0.47
+            if target == 'Ti':
+                self.muonstopsperPOT = 0.0019247
+                self.sim_ce_eff = 0.71
+                self.sim_dio_eff = 0.29
             if target == '42foils':
                 self.muonstopsperPOT = 0.001684
-                #self.sim_ce_eff = 0.7
-                #self.sim_dio_eff = 0.7
                 self.sim_ce_eff = 0.67
                 self.sim_dio_eff = 0.64
             if target == 'hex':
                 self.muonstopsperPOT = 0.00126
-                #self.sim_ce_eff = 0.6
-                #self.sim_dio_eff = 0.76
                 self.sim_ce_eff = 0.35
                 self.sim_dio_eff = 0.48
             if target == 'cylindermesh':
                 self.muonstopsperPOT = 0.00141761
-                #self.sim_ce_eff = 0.67
-                #self.sim_dio_eff = 0.54
                 self.sim_ce_eff = 0.72
                 self.sim_dio_eff = 0.62
             if target == 'screendefault':
-                #self.sim_ce_eff = 0.67
-                #self.sim_dio_eff = 0.84
                 self.sim_ce_eff = 0.60
                 self.sim_dio_eff = 0.45
                 self.muonstopsperPOT = 0.00155165
             if target == 'cylinderdefault':
-                #self.sim_ce_eff = 0.69
-                #self.sim_dio_eff = 0.7
-                #self.sim_ce_eff = 0.27
-                #self.sim_dio_eff = 0.58
-                #self.muonstopsperPOT = 0.00141536
                 self.sim_ce_eff = 0.49
                 self.sim_dio_eff = 0.45
                 self.muonstopsperPOT = 0.00104840
@@ -522,10 +516,6 @@ class YieldFunctions:
                 self.sim_dio_eff = 0.49
                 self.muonstopsperPOT = 0.00155841
             if target == 'screenholemesh':
-                #self.sim_ce_eff = 0.70
-                #self.sim_dio_eff = 0.65
-                #self.sim_ce_eff = 0.48
-                #self.sim_dio_eff = 0.74
                 self.sim_ce_eff = 0.69
                 self.sim_dio_eff = 0.59
                 self.muonstopsperPOT = 0.00151225
@@ -533,7 +523,15 @@ class YieldFunctions:
                 self.sim_ce_eff = 0.62
                 self.sim_dio_eff = 0.77
                 self.muonstopsperPOT = 0.00151086
-
+            if target == 'screenhole_mu2e2':
+                self.sim_ce_eff = 0.
+                self.sim_dio_eff = 0.
+                self.muonstopsperPOT = 0.000086110
+            if target == 'screendefault_mu2e2':
+                self.sim_ce_eff = 0.
+                self.sim_dio_eff = 0.
+                self.muonstopsperPOT = 0.000088006
+                
             print("main", target, self.sim_ce_eff, self.muonstopsperPOT)
             self.Histos = histos
             self.Results = []
@@ -638,7 +636,7 @@ class YieldFunctions:
             return SES
 
         def GetDIOExpectedYield(self, N_DIO_rec, N_DIO_gen, efficiency_error_DIO, mom_low, mom_high):
-            CzerneckiIntegral = self.DIO.GetInt(mom_low, mom_high)
+            CzerneckiIntegral = self.DIO.GetInt(mom_low, mom_high,self.target)
             N_DIO_expected = N_DIO_rec * CzerneckiIntegral * self.GetPOT() * self.MuonStopsPerPOT() * self.DecaysPerStop() / N_DIO_gen
             N_DIO_expected_error = CzerneckiIntegral * self.GetPOT() * self.MuonStopsPerPOT() * self.DecaysPerStop() * efficiency_error_DIO
             # compute error on N_DIO_expected from error on the efficiency

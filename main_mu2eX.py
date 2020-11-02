@@ -11,43 +11,40 @@ from optparse import OptionParser
 import matplotlib.pyplot as plt
 from ImportRecoData import ImportRecoData
 from ImportGenData import ImportGenData
-from Histograms import Histograms
+from Histograms import *
 from Mu2eXFunctions import *
 from Results import Results
 from ROOT import TCanvas
 
 
 def main(options, args):
-    UsePandas(400, 100, 110)
+    UsePandas(400, 100, 105)
 
 def UsePandas(nbins, mom_low, mom_high,):
     recodata = ImportRecoData(options.Mu2eXReco, options.DIOReco)
     gendata = ImportGenData(options.Mu2eXGen, options.DIOGen)
-    histos = Histograms(nbins, mom_low, mom_high,)
+    histos = HistogramsMu2eX(nbins, mom_low, mom_high,)
 
     #Get Data:
     DIO_reco_mom = recodata.GetFeature( "DIO", "deent.mom")
-    CE_reco_mom = recodata.GetFeature( "CE", "deent.mom")
+    signal_reco_mom = recodata.GetFeature( "signal", "deent.mom")
 
     # Fill Reco Hists:
-    histos.FillHistogram(histos.histo_CE_reconstructed , CE_reco_mom)
+    histos.FillHistogram(histos.histo_Mu2eX_reconstructed , signal_reco_mom)
     histos.FillHistogram(histos.histo_DIO_reconstructed_flat , DIO_reco_mom)
 
-
     histos.DoDIOWeights(histos.histo_DIO_reconstructed_reweighted , DIO_reco_mom)
-
+    histos.DoMu2eXWeights(histos.histo_Mu2eX_reconstructed_reweighted , DIO_reco_mom)
     # Fill Gen:
     DIO_gen_mom = gendata.GetFeature("DIO", "TMom")
-    CE_gen_mom = gendata.GetFeature("CE", "TMom")
-    #DIO_gen_mom = recodata.GetMagFeature("DIO", "demcgen.momx", "demcgen.momx", "demcgen.momx")
-    #CE_gen_mom = recodata.GetMagFeature("CE", "demcgen.momx", "demcgen.momx", "demcgen.momx")
+    signal_gen_mom = gendata.GetFeature("signal", "TMom")
+
     # Fill Gen Hists:
-    histos.FillHistogram(histos.histo_CE_generated , CE_gen_mom)
+    histos.FillHistogram(histos.histo_Mu2eX_generated , signal_gen_mom)
     histos.FillHistogram(histos.histo_DIO_generated_flat , DIO_gen_mom)
 
-
     histos.DoDIOWeights(histos.histo_DIO_generated_reweighted , DIO_gen_mom)
-
+    histos.DoMu2eXWeights(histos.histo_Mu2eX_generated_reweighted , DIO_gen_mom)
     # Build Functions:
     stats = StatsFunctions()
     yields = YieldFunctions(histos, nbins, mom_low, mom_high)
@@ -55,7 +52,7 @@ def UsePandas(nbins, mom_low, mom_high,):
     # Fill Results
     yields.FillResults()
 
-    yields.GetSingleResult(104,105)
+    #yields.GetSingleResult(104,105, True)
     yields.WriteHistograms()
 
 

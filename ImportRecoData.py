@@ -47,7 +47,7 @@ class ImportRecoData :
     def GetFeature(self, process, feature, flatten=False ):
         """ Open Root File and Extract Specified field """
         filename = ""
-        if process == "CE":
+        if process == "signal":
             filename = self.CEFileName
         if process == "DIO":
             filename = self.DIOFileName

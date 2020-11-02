@@ -9,7 +9,7 @@ import math
 import numpy
 import ROOT
 from ROOT import TMath, TH1F, TF1, TCanvas
-from Histograms import Histograms
+from Histograms import *
 from Results import ResultsMu2eX
 from DIO import DIO
 from Mu2eX import Mu2eX
@@ -477,11 +477,13 @@ class YieldFunctions:
             self.decaysperStop = 0.391
             self.muonstopsperPOT = 0.00159
             self.Mu2eXBR = 5e-5 #current limit
-            self.sim_mu2ex_eff = 0.78
+            self.sim_mu2ex_eff = 0.85
             self.sim_dio_eff = 0.5
             self.Histos = histos
             self.Results = []
             self.DIO = DIO()
+            self.Mu2eX = Mu2eX()
+
         def MomLowLimit(self):
             return self.momentum_lower_limit
 
@@ -625,6 +627,7 @@ class YieldFunctions:
 
         def GetDIOExpectedYield(self, N_DIO_rec, N_DIO_gen, efficiency_error_DIO, mom_low, mom_high):
             CzerneckiIntegral = self.DIO.GetInt(mom_low, mom_high)
+            print("Interngral", CzerneckiIntegral)
             N_DIO_expected = N_DIO_rec * CzerneckiIntegral * self.GetPOT() * self.MuonStopsPerPOT() * self.DecaysPerStop() / N_DIO_gen
             N_DIO_expected_error = CzerneckiIntegral * self.GetPOT() * self.MuonStopsPerPOT() * self.DecaysPerStop() * efficiency_error_DIO
             # compute error on N_DIO_expected from error on the efficiency
@@ -638,6 +641,22 @@ class YieldFunctions:
             print(N_DIO_rec,CzerneckiIntegral ,self.GetPOT(),self.MuonStopsPerPOT(),self.DecaysPerStop() , N_DIO_gen, N_DIO_expected)
             return N_DIO_expected, N_DIO_expected_error
 
+        def GetMu2eXExpectedYield(self, N_Mu2eX_rec, N_Mu2eX_gen, efficiency_error_Mu2eX, mom_low, mom_high):
+            Mu2eXIntegral = self.Mu2eX.GetInt(mom_low, mom_high)
+            N_Mu2eX_expected = N_Mu2eX_rec * Mu2eXIntegral * self.GetPOT() * self.MuonStopsPerPOT() * self.DecaysPerStop() / N_Mu2eX_gen
+            N_Mu2eX_expected_error = Mu2eXIntegral * self.GetPOT() * self.MuonStopsPerPOT() * self.DecaysPerStop() * efficiency_error_Mu2eX
+            # compute error on N_DIO_expected from error on the efficiency
+            if (abs(mom_low - self.SignalRegionStart()) < 0.01 and abs(mom_high - self.SignalRegionEnd()) < 0.01):
+                print( "===========================================================================")
+                print( "N_Mu2eX_rec = " , N_Mu2eX_rec )
+                print( "N_Mu2eX_gen = " , N_Mu2eX_gen )
+                print( "Czernecki Integral = " , Mu2eXIntegral )
+                print( "N_Mu2eX_expected = " , N_Mu2eX_expected )
+                print( "N_Mu2eX_expected_error = " , N_Mu2eX_expected_error)
+            print(N_Mu2eX_rec, Mu2eXIntegral ,self.GetPOT(),self.MuonStopsPerPOT(),self.DecaysPerStop() , N_Mu2eX_gen, N_Mu2eX_expected)
+            return N_Mu2eX_expected, N_Mu2eX_expected_error
+
+
 
         def GetBFUL(self, Nsig_UL, efficiency_mu2eX):
             BF_upper_limit = Nsig_UL / ( self.GetPOT() * self.MuonStopsPerPOT() * self.CapturesPerStop() * efficiency_mu2eX )
@@ -648,17 +667,26 @@ class YieldFunctions:
             + pow(Nsig_UL * efficiency_error_mu2eX/(efficiency_mu2eX*efficiency_mu2eX), 2))
             return BF_upper_limit_error
 
-        def GetSingleResult(self, mom_low, mom_high):
+        def GetSingleResult(self, mom_low, mom_high, use_offline):
             result = ResultsMu2eX()
             stats = StatsFunctions()
             result.momentum_low = mom_low
             result.momentum_high = mom_high
-            result.N_Mu2eX_gen =  self.Histos.histo_CE_generated.GetEntries()
-            result.N_Mu2eX_rec = self.GetN(self.Histos.histo_CE_reconstructed , mom_low, mom_high)
-            result.efficiency_Mu2eX = self.GetRecoEff(result.N_Mu2eX_rec,result.N_Mu2eX_gen, self.GetMu2eXSimEff())
-            result.efficiency_error_Mu2eX = self.GetRecoEffError(result.N_Mu2eX_rec,result.N_Mu2eX_gen)
-            result.N_Mu2eX_expected = self.GetSignalExpectedYield(result.efficiency_Mu2eX)
-            result.N_Mu2eX_expected_error = self.GetSignalExpectedYield(result.efficiency_error_Mu2eX)
+
+            if use_offline == True:
+                result.N_Mu2eX_gen =  self.Histos.histo_Mu2eX_generated.GetEntries()
+                result.N_Mu2eX_rec = self.GetN(self.Histos.histo_Mu2eX_reconstructed , mom_low, mom_high)
+                result.efficiency_Mu2eX = self.GetRecoEff(result.N_Mu2eX_rec,result.N_Mu2eX_gen, self.GetMu2eXSimEff())
+                result.efficiency_error_Mu2eX = self.GetRecoEffError(result.N_Mu2eX_rec,result.N_Mu2eX_gen)
+                result.N_Mu2eX_expected = self.GetSignalExpectedYield(result.efficiency_Mu2eX) #self.GetMu2eXExpectedYield(result.N_Mu2eX_rec, result.N_Mu2eX_rec_error, result.N_Mu2eX_gen, result.N_Mu2eX_gen_error) #s
+                result.N_Mu2eX_expected_error = self.GetSignalExpectedYield(result.efficiency_error_Mu2eX)
+            if use_offline == False:
+                result.N_Mu2eX_gen =  self.GetN(self.Histos.histo_Mu2eX_generated_reweighted, mom_low, mom_high)
+                result.N_Mu2eX_rec = self.GetN(self.Histos.histo_Mu2eX_reconstructed_reweighted , mom_low, mom_high)
+                result.efficiency_Mu2eX = self.GetRecoEff(result.N_Mu2eX_rec,result.N_Mu2eX_gen, self.GetMu2eXSimEff())
+                result.efficiency_error_Mu2eX = self.GetRecoEffError(result.N_Mu2eX_rec,result.N_Mu2eX_gen)
+                result.N_Mu2eX_expected, result.N_Mu2eX_expected_error  = self.GetMu2eXExpectedYield(result.N_Mu2eX_rec,result.N_Mu2eX_gen, result.efficiency_error_Mu2eX,mom_low, mom_high)
+
             result.SES = self.GetSES(result.efficiency_Mu2eX)
             result.SES_error =  self.GetSESError(result.efficiency_Mu2eX,result.efficiency_error_Mu2eX)
             result.N_DIO_gen = self.GetN(self.Histos.histo_DIO_generated_reweighted, mom_low, mom_high)
@@ -688,7 +716,7 @@ class YieldFunctions:
         def FillResults(self):
             mom_low=self.MomLowLimit()
             stats = StatsFunctions()
-            Ngen_CE = self.Histos.histo_CE_generated.GetEntries()
+            Ngen_Mu2eX = self.Histos.histo_Mu2eX_generated.GetEntries()
             while(mom_low < self.MomHighLimit()):
                 mom_high = mom_low + 0.05
                 while(mom_high < self.MomHighLimit()):
@@ -702,11 +730,11 @@ class YieldFunctions:
                     if (math.isnan(result.momentum_high)):
                         break
 
-                    result.N_Mu2eX_gen =  self.Histos.histo_CE_generated.GetEntries()
+                    result.N_Mu2eX_gen =  self.Histos.histo_Mu2eX_generated.GetEntries()
                     if (math.isnan(result.N_Mu2eX_gen)):
                         break
 
-                    result.N_Mu2eX_rec = self.GetN(self.Histos.histo_CE_reconstructed, mom_low,mom_high)
+                    result.N_Mu2eX_rec = self.GetN(self.Histos.histo_Mu2eX_reconstructed, mom_low,mom_high)
                     if (math.isnan(result.N_Mu2eX_rec)):
                         break
 
@@ -823,7 +851,7 @@ class YieldFunctions:
 
         def WriteHistograms(self):
             """function to make TTree"""
-            c_dio=TCanvas()
+            c_dio = TCanvas()
             c_dio.Divide(2,2)
             c_dio.cd(1)
             self.Histos.histo_DIO_generated_reweighted.Draw('HIST')
@@ -834,7 +862,14 @@ class YieldFunctions:
             c_signal=TCanvas()
             c_signal.Divide(2,2)
             c_signal.cd(1)
-            self.Histos.histo_CE_generated.Draw('HIST')
+            self.Histos.histo_Mu2eX_generated.Draw('HIST')
             c_signal.cd(2)
-            self.Histos.histo_CE_reconstructed.Draw('HIST')
+            self.Histos.histo_Mu2eX_reconstructed.Draw('HIST')
             c_signal.SaveAs("Mu2eX.root")
+
+            outHistFile = ROOT.TFile.Open("DIOReweight.root" ,"RECREATE")
+            outHistFile.cd()
+
+            self.Histos.histo_DIO_reconstructed_reweighted.Write()
+
+            outHistFile.Close()
