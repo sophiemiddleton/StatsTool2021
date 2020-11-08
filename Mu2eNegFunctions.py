@@ -479,10 +479,7 @@ class YieldFunctions:
             self.sim_ce_eff = 1
             self.sim_dio_eff = 1
             self.target = target
-            if target == 'mu2e2':
-                self.muonstopsperPOT = 0.000090911
-                self.sim_ce_eff = 0.75
-                self.sim_dio_eff = 0.77
+
             if target == 'mu2e':
                 self.muonstopsperPOT = 0.00153814
                 self.sim_ce_eff = 0.77
@@ -523,15 +520,27 @@ class YieldFunctions:
                 self.sim_ce_eff = 0.62
                 self.sim_dio_eff = 0.77
                 self.muonstopsperPOT = 0.00151086
+            if target == 'mu2e2':
+                self.muonstopsperPOT = 0.000090911
+                self.sim_ce_eff = 0.75
+                self.sim_dio_eff = 0.77
             if target == 'screenhole_mu2e2':
-                self.sim_ce_eff = 0.
-                self.sim_dio_eff = 0.
-                self.muonstopsperPOT = 0.000086110
+                self.sim_ce_eff = 0.69
+                self.sim_dio_eff = 0.64
+                self.muonstopsperPOT =  0.000086110
             if target == 'screendefault_mu2e2':
-                self.sim_ce_eff = 0.
-                self.sim_dio_eff = 0.
+                self.sim_ce_eff = 0.81
+                self.sim_dio_eff = 0.66
                 self.muonstopsperPOT = 0.000088006
-                
+            if target == 'screenmesh_mu2e2':
+                self.sim_ce_eff = 0.79
+                self.sim_dio_eff = 0.81
+                self.muonstopsperPOT = 0.000088106
+            if target == 'screenholemesh_mu2e2':
+                self.sim_ce_eff = 0.76
+                self.sim_dio_eff = 0.64
+                self.muonstopsperPOT = 0.000086042
+
             print("main", target, self.sim_ce_eff, self.muonstopsperPOT)
             self.Histos = histos
             self.Results = []
@@ -561,7 +570,7 @@ class YieldFunctions:
             return self.signal_end
 
         def GetPOT(self):
-            return self.POT_CD3
+            return self.POT_mu2e2
 
         def CapturesPerStop(self):
             return self.capturesperStop
