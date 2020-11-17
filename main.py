@@ -21,7 +21,7 @@ def main(options, args):
     print("Importing Data from: CE", options.CEReco, options.CEGen, "DIO",
 options.DIOReco, options.DIOGen, "internal RPC", options.RPCintReco, options.RPCintGen,
 "external RPC", options.RPCextReco, options.RPCextGen, options.Cosmics)
-    UsePandas(400, 100, 110)
+    UsePandas(400, 90, 110)
 
 def UsePandas(nbins, mom_low, mom_high,):
     recodata = ImportRecoData(options.CEReco, options.DIOReco, options.RPCextReco, options.RPCintReco)
@@ -41,7 +41,7 @@ def UsePandas(nbins, mom_low, mom_high,):
         histos.FillHistogram(histos.histo_extRPC_reconstructed , RPCext_reco_mom)
         histos.FillHistogram(histos.histo_intRPC_reconstructed , RPCint_reco_mom)
 
-    if options.target == 'Ti':
+    if options.target == 'Ti' or options.target == 'Ti_34' or options.target == 'Ti_25' or options.target == 'Ti_32':
         histos.DoDIOWeights_Ti(histos.histo_DIO_reconstructed_reweighted , DIO_reco_mom)
     else:
         histos.DoDIOWeights(histos.histo_DIO_reconstructed_reweighted , DIO_reco_mom)
@@ -49,7 +49,7 @@ def UsePandas(nbins, mom_low, mom_high,):
     # Fill Gen:
     DIO_gen_mom = gendata.GetFeature("DIO", "TMom")
     CE_gen_mom = gendata.GetFeature("signal", "TMom")
-    
+
     # Fill Gen Hists:
     histos.FillHistogram(histos.histo_CE_generated , CE_gen_mom)
     histos.FillHistogram(histos.histo_DIO_generated_flat , DIO_gen_mom)
@@ -60,19 +60,17 @@ def UsePandas(nbins, mom_low, mom_high,):
         histos.FillHistogram(histos.histo_intRPC_generated , RPCint_gen_mom)
         histos.FillHistogram(histos.histo_extRPC_generated , RPCext_gen_mom)
 
-    if options.target=='Ti':
+    if options.target == 'Ti' or options.target == 'Ti_34' or options.target == 'Ti_25' or options.target == 'Ti_32':
         histos.DoDIOWeights_Ti(histos.histo_DIO_generated_reweighted , DIO_gen_mom)
     else:
         histos.DoDIOWeights(histos.histo_DIO_generated_reweighted , DIO_gen_mom)
 
     # Build Functions:
-    stats = StatsFunctions()
     yields = YieldFunctions(histos, nbins, mom_low, mom_high, options.RPCintReco, options.RPCextReco, options.target, showRPC)
 
     # Fill Results
-    yields.FillResults()
-
-    yields.GetSingleResult(103.75,105)
+    #yields.FillResults()
+    yields.GetSingleResult(102,105)
     yields.WriteHistograms()
 
 def UseROOT(bins, mom_low, mom_high,):
@@ -87,7 +85,6 @@ def UseROOT(bins, mom_low, mom_high,):
     histos.DoDIOWeights(histos.histo_DIO_generated_reweighted , DIO_gen_mom)
 
     # Build Functions:
-    stats = StatsFunctions()
     yields = YieldFunctions(histos, nbins, mom_low, mom_high, options.RPCintReco, options.RPCextReco, options.target, showRPC)
 
     # Fill Results

@@ -51,11 +51,11 @@ class DIO :
         else:
             return 0.0
 
+
     def DIOWeight(self, x):
         ee = x
         mal = 25133
         emu = 105.194
-
         a5 = 8.6434e-17
         a6 = 1.16874e-17
         a7 = -1.87828e-19
@@ -70,7 +70,6 @@ class DIO :
         ee = x
         mal = 25133
         emu = 105.194
-
         a5 = 4.44278e-16
         a6 = 9.06648e-17
         a7 = -4.26245e-18
@@ -87,16 +86,20 @@ class DIO :
         return _diocz_f.Integral(mom_low,mom_high)
 
     def GetInt(self,mom_low, mom_high,target):
-        if target == 'Ti':
+        if target == 'Ti' or target == 'Ti_34' or target == 'Ti_25' or target == 'Ti_32':
             f = lambda x:self.DIOcz_Ti(x)
+
             intergral = integrate.quad(f, mom_low,mom_high)
             print("intergral",intergral)
             return intergral[0]
+
         else:
             f = lambda x:self.DIOcz(x)
+            
             intergral = integrate.quad(f, mom_low,mom_high)
             print("intergral",intergral)
             return intergral[0]
+
 
     def GetNgen(self):
         return self.Ngen
