@@ -15,6 +15,7 @@ from Histograms import Histograms
 from Mu2eNegFunctions import *
 from Results import Results
 from ROOT import TCanvas
+from Fitter.Resolution import Resolution_Func
 
 
 def main(options, args):
@@ -24,6 +25,7 @@ options.DIOReco, options.DIOGen, "internal RPC", options.RPCintReco, options.RPC
     UsePandas(400, 90, 110)
 
 def UsePandas(nbins, mom_low, mom_high,):
+
     recodata = ImportRecoData(options.CEReco, options.DIOReco, options.RPCextReco, options.RPCintReco)
     gendata = ImportGenData(options.CEGen, options.DIOGen, options.RPCextGen, options.RPCintGen)
     histos = Histograms(nbins, mom_low, mom_high,)
@@ -71,7 +73,9 @@ def UsePandas(nbins, mom_low, mom_high,):
     # Fill Results
     #yields.FillResults()
     yields.GetSingleResult(102,105)
-    yields.WriteHistograms()
+    #yields.WriteHistograms()
+    res = Resolution_Func(options.CEReco)
+    res.Fit_Resolution()
 
 def UseROOT(bins, mom_low, mom_high,):
     #Pass the .root TH1F's to histograms directly

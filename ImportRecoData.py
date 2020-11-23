@@ -6,7 +6,7 @@ import sys
 import uproot
 import pandas
 import math
-
+from Cuts import *
 class ImportRecoData :
 
     def __init__(self, CEfileName, DIOfileName , RPCextfileName=False, RPCintfileName=False, CosmicsfileName=False, treeName = "TrkAnaNeg", branchName = "trkana"):
@@ -18,6 +18,7 @@ class ImportRecoData :
         self.CosmicsFileName = CosmicsfileName
         self.TreeName = treeName
         self.BranchName = branchName
+        self.cuts = Cuts()
 
     def Import(self, process, flatten = False):
         """ Import root tree and save it as a pandas dataframe """
@@ -60,6 +61,7 @@ class ImportRecoData :
         input_file = uproot.open(filename)
         input_tree = input_file[self.TreeName][self.BranchName]
         df = input_tree.pandas.df(flatten=flatten)
+        #df = self.cuts.ApplyCut(df)
         return df[feature]
 
     def GetMagFeature(self, process, feature_x, feature_y, feature_z, flatten=False ):

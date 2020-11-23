@@ -53,8 +53,8 @@ class YieldFunctions:
                 self.decaysperStop = 0.15
             if target == 'Ti_32':
                 self.muonstopsperPOT = 0.00182270
-                self.sim_ce_eff = 0.62
-                self.sim_dio_eff = 0.41
+                self.sim_ce_eff = 0.61
+                self.sim_dio_eff = 0.85
                 self.capturesperStop = 0.85
                 self.decaysperStop = 0.15
             if target == 'Ti_25':
