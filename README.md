@@ -21,6 +21,28 @@ A standard Mu2e-II analyzer can be use to generated ready-formatted NTuples for 
 
 It is currently in development.
 
+# Target analysis:
+
+During the Mu2e-II study several target designs and materials have been looked at.
+
+In StatsTool we have the ability to choose a Target element using the ```--target``` command on initialization.
+
+Curent choices are:
+
+* Aluminium - use ```--target Al```
+* Titanium - use ```--target Ti```
+* Vanadium - use ```--target V```
+
+The parameters altered for different targets include:
+
+* muonstopsperPOT
+* capturesperStop
+* decaysperStop
+* Radiative DIO corrections
+
+Currently there is no analytical expression for DIO corrections in Vanadium so we use a slightly altered version of those for Titanium.
+
+
 # To Run:
 
 To run the code use the ```driver.sh``` script, edit the paths accordingly, in the form:
