@@ -48,8 +48,6 @@ class Resolution_Func :
         for i,j in enumerate(df["deent.mom"]):
             momGen = math.sqrt(df["demcent.momx"][i]**2 + df["demcent.momy"][i]**2 + df["demcent.momz"][i]**2)
             h.Fill(j - momGen)
-
-
             c = ROOT.TCanvas("myCanvasName","The Canvas Title",800,600)
             h.Draw()
             c.Draw()
@@ -66,7 +64,7 @@ class Resolution_Func :
             dscb.SetParameters(integral, h.GetMean(),0.5*h.GetRMS(),0.9,3.5,1.1,6.0);
             h.Fit("dscb", "LR");
 
-            c.Draw()
+            #c.Draw()
             h.GetXaxis().SetTitle("Electron Momentum [MeV/c]")
             h.GetYaxis().SetTitle("Weighted N")
             c.SaveAs("Resolution.root")

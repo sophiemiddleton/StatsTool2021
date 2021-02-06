@@ -51,7 +51,23 @@ class DIO :
         else:
             return 0.0
 
-
+    def DIOcz_V(self, x):
+        ee = x;
+        norm = 1; #par[0];
+        mal = 25133
+        mmu = 105.052
+        emu = 105.194
+        emue = 104.973
+        me = 0.511
+        a5 = 4.44278e-16
+        a6 = 9.06648e-17
+        a7 = -4.26245e-18
+        a8 = 8.193e-19
+        delta = emu - ee - ee*ee/(2*mal)
+        if(delta > 0.0):
+            return norm*(a5*pow(delta,5) + a6*pow(delta,6) + a7*pow(delta,7) + a8*pow(delta,8))
+        else:
+            return 0.0
     def DIOWeight(self, x):
         ee = x
         mal = 25133
@@ -69,7 +85,7 @@ class DIO :
     def DIOWeight_Ti(self, x):
         ee = x
         mal = 25133
-        emu = 105.194
+        emu = 105.394
         a5 = 4.44278e-16
         a6 = 9.06648e-17
         a7 = -4.26245e-18
@@ -79,23 +95,40 @@ class DIO :
             return (a5*pow(delta,5) + a6*pow(delta,6) + a7*pow(delta,7) + a8*pow(delta,8))
         else:
             return 0.0
-
+    def DIOWeight_V(self, x):
+        ee = x
+        mal = 25133
+        emu = 105.052
+        a5 = 4.44278e-16
+        a6 = 9.06648e-17
+        a7 = -4.26245e-18
+        a8 = 8.193e-19
+        delta = emu - ee - ee*ee/(2*mal)
+        if(delta > 0.0):
+            return (a5*pow(delta,5) + a6*pow(delta,6) + a7*pow(delta,7) + a8*pow(delta,8))
+        else:
+            return 0.0
     def GetDIOIntegral(self, mom_low, mom_high):
         _diocz_f = TF1("_diocz_f",self.DIOcz, 90,110.,1)
         _diocz_f.SetParameter(0,1.0)
         return _diocz_f.Integral(mom_low,mom_high)
 
     def GetInt(self,mom_low, mom_high,target):
-        if target == 'Ti' or target == 'Ti_34' or target == 'Ti_25' or target == 'Ti_32':
+        if target == 'Ti':
             f = lambda x:self.DIOcz_Ti(x)
 
             intergral = integrate.quad(f, mom_low,mom_high)
             print("intergral",intergral)
             return intergral[0]
+        if target == 'V':
+            f = lambda x:self.DIOcz_V(x)
 
-        else:
+            intergral = integrate.quad(f, mom_low,mom_high)
+            print("intergral",intergral)
+            return intergral[0]
+        if target == 'Al':
             f = lambda x:self.DIOcz(x)
-            
+
             intergral = integrate.quad(f, mom_low,mom_high)
             print("intergral",intergral)
             return intergral[0]

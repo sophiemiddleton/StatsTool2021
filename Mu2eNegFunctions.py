@@ -22,8 +22,8 @@ class YieldFunctions:
             self.momentum_upper_limit = mom_high
             self.nBins = nbins
             self.momentum_Bin_width = (mom_high - mom_low)/nbins
-            self.signal_start = 103.25
-            self.signal_end = 105.2
+            self.signal_start = 102.5
+            self.signal_end = 105
             self.livegate = 700.
             self.POT_CD3= 3.6e20
             self.POT_Run1= 3.76e19
@@ -35,7 +35,7 @@ class YieldFunctions:
             self.sim_dio_eff = 1
             self.target = target
 
-            if target == 'mu2e':
+            if target == 'Al':
                 self.muonstopsperPOT = 0.00153814
                 self.sim_ce_eff = 0.77
                 self.sim_dio_eff = 0.47
@@ -45,76 +45,15 @@ class YieldFunctions:
                 self.sim_dio_eff = 0.29
                 self.capturesperStop = 0.85
                 self.decaysperStop = 0.15
-            if target == 'Ti_34':
-                self.muonstopsperPOT = 0.00171
-                self.sim_ce_eff = 0.67
-                self.sim_dio_eff = 0.67
-                self.capturesperStop = 0.85
-                self.decaysperStop = 0.15
-            if target == 'Ti_32':
-                self.muonstopsperPOT = 0.00182270
-                self.sim_ce_eff = 0.61
-                self.sim_dio_eff = 0.85
-                self.capturesperStop = 0.85
-                self.decaysperStop = 0.15
-            if target == 'Ti_25':
-                self.muonstopsperPOT = 0.00146796
-                self.sim_ce_eff = 0.7
-                self.sim_dio_eff = 0.49
-                self.capturesperStop = 0.85
-                self.decaysperStop = 0.15
-            if target == '42foils':
-                self.muonstopsperPOT = 0.001684
-                self.sim_ce_eff = 0.67
-                self.sim_dio_eff = 0.64
-            if target == 'hex':
-                self.muonstopsperPOT = 0.00126
-                self.sim_ce_eff = 0.35
-                self.sim_dio_eff = 0.48
-            if target == 'cylindermesh':
-                self.muonstopsperPOT = 0.00141761
-                self.sim_ce_eff = 0.72
+            if target == 'V':
+                #self.muonstopsperPOT = 0.00224 # - 34
+                self.muonstopsperPOT = 0.00243 #- 37
+                #self.muonstopsperPOT = 0.00209 # - 30
+                self.sim_ce_eff = 0.42
                 self.sim_dio_eff = 0.62
-            if target == 'screendefault':
-                self.sim_ce_eff = 0.60
-                self.sim_dio_eff = 0.45
-                self.muonstopsperPOT = 0.00155165
-            if target == 'cylinderdefault':
-                self.sim_ce_eff = 0.49
-                self.sim_dio_eff = 0.45
-                self.muonstopsperPOT = 0.00104840
-            if target == 'screenmesh':
-                self.sim_ce_eff = 0.63
-                self.sim_dio_eff = 0.49
-                self.muonstopsperPOT = 0.00155841
-            if target == 'screenholemesh':
-                self.sim_ce_eff = 0.69
-                self.sim_dio_eff = 0.59
-                self.muonstopsperPOT = 0.00151225
-            if target == 'screenhole':
-                self.sim_ce_eff = 0.62
-                self.sim_dio_eff = 0.77
-                self.muonstopsperPOT = 0.00151086
-            if target == 'mu2e2':
-                self.muonstopsperPOT = 0.000090911
-                self.sim_ce_eff = 0.75
-                self.sim_dio_eff = 0.77
-            if target == 'screenhole_mu2e2':
-                self.sim_ce_eff = 0.69
-                self.sim_dio_eff = 0.64
-                self.muonstopsperPOT =  0.000086110
-            if target == 'screendefault_mu2e2':
-                self.sim_ce_eff = 0.81
-                self.sim_dio_eff = 0.66
-                self.muonstopsperPOT = 0.000088006
-            if target == 'screenmesh_mu2e2':
-                self.sim_ce_eff = 0.79
-                self.sim_dio_eff = 0.81
-                self.muonstopsperPOT = 0.000088106
-            if target == 'screenholemesh_mu2e2':
-                self.sim_ce_eff = 0.76
-                self.sim_dio_eff = 0.64
-                self.muonstopsperPOT = 0.000086042
+                self.capturesperStop = 0.87
+                self.decaysperStop = 0.13
+
 
             print("main", target, self.sim_ce_eff, self.muonstopsperPOT, self.capturesperStop)
             self.Histos = histos

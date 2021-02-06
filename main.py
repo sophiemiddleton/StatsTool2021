@@ -43,9 +43,11 @@ def UsePandas(nbins, mom_low, mom_high,):
         histos.FillHistogram(histos.histo_extRPC_reconstructed , RPCext_reco_mom)
         histos.FillHistogram(histos.histo_intRPC_reconstructed , RPCint_reco_mom)
 
-    if options.target == 'Ti' or options.target == 'Ti_34' or options.target == 'Ti_25' or options.target == 'Ti_32':
+    if options.target == 'Ti' :
         histos.DoDIOWeights_Ti(histos.histo_DIO_reconstructed_reweighted , DIO_reco_mom)
-    else:
+    if options.target == 'V' :
+        histos.DoDIOWeights_V(histos.histo_DIO_reconstructed_reweighted , DIO_reco_mom)
+    if options.target == 'Al':
         histos.DoDIOWeights(histos.histo_DIO_reconstructed_reweighted , DIO_reco_mom)
 
     # Fill Gen:
@@ -62,38 +64,22 @@ def UsePandas(nbins, mom_low, mom_high,):
         histos.FillHistogram(histos.histo_intRPC_generated , RPCint_gen_mom)
         histos.FillHistogram(histos.histo_extRPC_generated , RPCext_gen_mom)
 
-    if options.target == 'Ti' or options.target == 'Ti_34' or options.target == 'Ti_25' or options.target == 'Ti_32':
+    if options.target == 'Ti'  :
         histos.DoDIOWeights_Ti(histos.histo_DIO_generated_reweighted , DIO_gen_mom)
-    else:
+    if options.target == 'V' :
+        histos.DoDIOWeights_V(histos.histo_DIO_generated_reweighted , DIO_gen_mom)
+    if options.target == 'Al' :
         histos.DoDIOWeights(histos.histo_DIO_generated_reweighted , DIO_gen_mom)
 
     # Build Functions:
     yields = YieldFunctions(histos, nbins, mom_low, mom_high, options.RPCintReco, options.RPCextReco, options.target, showRPC)
 
     # Fill Results
-    #yields.FillResults()
-    yields.GetSingleResult(102,105)
+    yields.FillResults()
+    #yields.GetSingleResult(102.5,104.5)
     #yields.WriteHistograms()
-    res = Resolution_Func(options.CEReco)
-    res.Fit_Resolution()
-
-def UseROOT(bins, mom_low, mom_high,):
-    #Pass the .root TH1F's to histograms directly
-    histos = Histograms(nbins, mom_low, mom_high,)
-    showRPC = options.showRPC
-
-    # Fill Reco Hists:
-    histos.FillGenHistogramROOT(options.CEReco, options.DIOReco, options.RPCextReco, options.RPCintReco)
-    histos.FillRecoHistogramROOT(options.CEGen, options.DIOGen, options.RPCextGen, options.RPCintGen)
-    histos.DoDIOWeights(histos.histo_DIO_reconstructed_reweighted , DIO_reco_mom)
-    histos.DoDIOWeights(histos.histo_DIO_generated_reweighted , DIO_gen_mom)
-
-    # Build Functions:
-    yields = YieldFunctions(histos, nbins, mom_low, mom_high, options.RPCintReco, options.RPCextReco, options.target, showRPC)
-
-    # Fill Results
-    #yields.FillResults()
-    yields.GetSingleResult(103.75,105)
+    #res = Resolution_Func(options.CEReco)
+    #res.Fit_Resolution()
 
 def plot1DHist(file_name, tree_name, branch_name, feature_name):
     """ Basic funciton to make a plot of a feature """

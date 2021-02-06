@@ -6,7 +6,7 @@ The purpose of this code is for the optimization of the Mu2e-II Stopping Target.
 
 # How to use
 
-To use this code you must have made NTuple's using the Mu2e-II Offline Software.
+To use this code you must have made TrkAna NTuple's using the Mu2e-II Offline Software.
 
 The code takes in the Mu2e signal and 3 background NTuples:
 
@@ -23,7 +23,7 @@ It is currently in development.
 
 # To Run:
 
-To run the code:
+To run the code use the ```driver.sh``` script, edit the paths accordingly, in the form:
 
 ```python main.py --CE ... --DIO ... --RPC ... --Cosmics```
 
