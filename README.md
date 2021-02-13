@@ -42,6 +42,24 @@ The parameters altered for different targets include:
 
 Currently there is no analytical expression for DIO corrections in Vanadium so we use a slightly altered version of those for Titanium.
 
+# To Make your own data:
+
+I have used Mu2e/Offline - all you need to do is make sure you save the Generated momentum as a TTree.
+
+I use TrkAna root TTrees as input for Reconstructed momentum
+
+To alter the target:
+
+* Mu2eG4/src/contruct_stopping_target.cc - alter geometry here
+* To alter material you need to use the Mu2eG4/test/globalConstants01.txt and reset the physic parameter:
+
+```string physicsParams.chosenStoppingTargetMaterial = "Al";```
+
+To add in a new material define all the parameters here.
+
+* New instances must be added to the EvenGenerator for the new conversion energy spectrum.
+
+* In the ```CeEndpoint.fcl``` and ```TGTstops.fcl``` you will need to make sure you are setup to use your new material.
 
 # To Run:
 

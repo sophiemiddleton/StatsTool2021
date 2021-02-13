@@ -372,8 +372,8 @@ class YieldFunctions:
                     print("Expected DIO", result.N_DIO_expected , result.N_DIO_expected_error, result.Nsig_UL)
                     # calculate error on Nsig_UL by calculation of the Feldman-Cousins sensitivity of N_DIO_expected - 1*sigma and N_DIO_expected + 1*sigma, take maximum of both values
                     result.Nsig_UL_error = 999
-                    if(result.N_DIO_expected > 9):
-                        result.N_DIO_expected = 9
+                    if(result.N_DIO_expected > 10):
+                        result.N_DIO_expected = 10
                     if (result.Nsig_UL != 999):
 
                         temp_Nsig_UL_error_lower = result.Nsig_UL - stats.GetFeldmanCousinsSensitivity(result.N_DIO_expected - result.N_DIO_expected_error)
