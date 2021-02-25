@@ -16,44 +16,52 @@ from StatsFunctions import *
 
 class YieldFunctions:
 
-        def __init__(self,histos, nbins, mom_low, mom_high, rpc_filename_int, rpc_filename_ext, target, showRPC=True):
+        def __init__(self,histos, nbins, mom_low, mom_high, rpc_filename_int, rpc_filename_ext, target, experiment, showRPC=True):
             self.showRPC = showRPC
             self.momentum_lower_limit = mom_low
             self.momentum_upper_limit = mom_high
             self.nBins = nbins
             self.momentum_Bin_width = (mom_high - mom_low)/nbins
-            self.signal_start = 102.5
-            self.signal_end = 105
-            self.livegate = 700.
+            self.livegate = 700
             self.POT_CD3= 3.6e20
             self.POT_Run1= 3.76e19
             self.POT_mu2e2 = 5e22
+            # For Al as default:
             self.capturesperStop = 0.609
             self.decaysperStop = 0.391
             self.muonstopsperPOT = 0.00153814
+            # Default assumes no failed jobs:
             self.sim_ce_eff = 1
             self.sim_dio_eff = 1
             self.target = target
+            self.experiment = experiment
 
             if target == 'Al':
                 self.muonstopsperPOT = 0.00153814
                 self.sim_ce_eff = 0.77
                 self.sim_dio_eff = 0.47
+                self.signal_start = 103.85
+                self.signal_end = 105.1
+
             if target == 'Ti':
-                self.muonstopsperPOT = 0.0019247
-                self.sim_ce_eff = 0.71
-                self.sim_dio_eff = 0.29
+                self.muonstopsperPOT = 0.00010125
+                self.sim_ce_eff = 0.67
+                self.sim_dio_eff = 0.67
                 self.capturesperStop = 0.85
                 self.decaysperStop = 0.15
+                self.signal_start = 103.25
+                self.signal_end = 104.5
+
             if target == 'V':
                 #self.muonstopsperPOT = 0.00224 # - 34
-                self.muonstopsperPOT = 0.00243 #- 37
+                #self.muonstopsperPOT = 0.00243 #- 37
                 #self.muonstopsperPOT = 0.00209 # - 30
                 self.sim_ce_eff = 0.42
                 self.sim_dio_eff = 0.62
                 self.capturesperStop = 0.87
                 self.decaysperStop = 0.13
-
+                self.signal_start = 103.0
+                self.signal_end = 104.25
 
             print("main", target, self.sim_ce_eff, self.muonstopsperPOT, self.capturesperStop)
             self.Histos = histos
@@ -71,7 +79,7 @@ class YieldFunctions:
         def NBins(self):
             return self.nBins
 
-        def NBinsSetps(self):
+        def NBins(self):
             return (self.MomHighLimit()-self.MomLowLimit())/self.NBins()
 
         def MomBinWidth(self):
@@ -84,8 +92,13 @@ class YieldFunctions:
             return self.signal_end
 
         def GetPOT(self):
-            return self.POT_CD3
-
+            POT = 1
+            if self.experiment == 'mu2e':
+                POT = self.POT_CD3
+            if self.experiment == 'mu2e2':
+                POT = self.POT_mu2e2
+            print("Protons",POT)
+            return POT
         def CapturesPerStop(self):
             return self.capturesperStop
 
@@ -200,7 +213,7 @@ class YieldFunctions:
             stats = StatsFunctions()
             result.momentum_low = mom_low
             result.momentum_high = mom_high
-            result.N_CE_gen =  self.Histos.histo_CE_generated.GetEntries()
+            result.N_CE_gen =  self.Histos.histo_CE_generated.GetEntries() #TODO: assumes momlow and high contain all signal!
             result.N_CE_rec = self.GetN(self.Histos.histo_CE_reconstructed , mom_low, mom_high)
             result.efficiency_CE = self.GetRecoEff(result.N_CE_rec,result.N_CE_gen, self.GetCESimEff())
             result.efficiency_error_CE = self.GetRecoEffError(result.N_CE_rec,result.N_CE_gen)
@@ -245,7 +258,7 @@ class YieldFunctions:
             stats = StatsFunctions()
             Ngen_CE = self.Histos.histo_CE_generated.GetEntries()
             while(mom_low < self.MomHighLimit()):
-                mom_high = mom_low + 0.05
+                mom_high = mom_low + self.momentum_Bin_width
                 while(mom_high < self.MomHighLimit()):
                     print("Evaluating", mom_low, mom_high)
                     #perform calculations, check results for reasanable values and for infinity or NaN, save results
@@ -257,8 +270,8 @@ class YieldFunctions:
                     if (math.isnan(result.momentum_high)):
                         break
 
-                    result.N_CE_gen =  self.Histos.histo_CE_generated.GetEntries()
-                    if (math.isnan(result.N_CE_gen)):
+                    result.N_CE_gen =  self.GetN(self.Histos.histo_CE_generated, mom_low,mom_high)#self.Histos.histo_CE_generated.GetEntries()
+                    if (result.N_CE_gen==0 or math.isnan(result.N_CE_gen)):
                         break
 
                     result.N_CE_rec = self.GetN(self.Histos.histo_CE_reconstructed, mom_low,mom_high)
@@ -364,16 +377,16 @@ class YieldFunctions:
                         result.SES_error =  0
                     if (math.isnan(result.SES) or math.isnan(result.SES_error)):
                         break
-                    if(result.N_DIO_expected > 10):
-                        result.N_DIO_expected = 10
+                    if(result.N_DIO_expected > 9):
+                        result.N_DIO_expected = 9
                     result.Nsig_UL = stats.GetFeldmanCousinsSensitivity(result.N_DIO_expected) #TODO + result.N_intRPCs_expected + result.N_extRPCs_expected)
                     if (math.isnan(result.Nsig_UL)):
                         break
                     print("Expected DIO", result.N_DIO_expected , result.N_DIO_expected_error, result.Nsig_UL)
                     # calculate error on Nsig_UL by calculation of the Feldman-Cousins sensitivity of N_DIO_expected - 1*sigma and N_DIO_expected + 1*sigma, take maximum of both values
                     result.Nsig_UL_error = 999
-                    if(result.N_DIO_expected > 10):
-                        result.N_DIO_expected = 10
+                    if(result.N_DIO_expected > 9):
+                        result.N_DIO_expected = 9
                     if (result.Nsig_UL != 999):
 
                         temp_Nsig_UL_error_lower = result.Nsig_UL - stats.GetFeldmanCousinsSensitivity(result.N_DIO_expected - result.N_DIO_expected_error)

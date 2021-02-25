@@ -22,7 +22,7 @@ def main(options, args):
     print("Importing Data from: CE", options.CEReco, options.CEGen, "DIO",
 options.DIOReco, options.DIOGen, "internal RPC", options.RPCintReco, options.RPCintGen,
 "external RPC", options.RPCextReco, options.RPCextGen, options.Cosmics)
-    UsePandas(400, 90, 110)
+    UsePandas(100, 102,105)
 
 def UsePandas(nbins, mom_low, mom_high,):
 
@@ -30,9 +30,10 @@ def UsePandas(nbins, mom_low, mom_high,):
     gendata = ImportGenData(options.CEGen, options.DIOGen, options.RPCextGen, options.RPCintGen)
     histos = Histograms(nbins, mom_low, mom_high,)
     showRPC = options.showRPC
+
     #Get Data:
-    DIO_reco_mom = recodata.GetFeature( "DIO", "deent.mom")
-    CE_reco_mom = recodata.GetFeature( "signal", "deent.mom")
+    DIO_reco_mom = recodata.GetFeature( "DIO", "deent.mom",False,True)
+    CE_reco_mom = recodata.GetFeature( "signal", "deent.mom",False,True)
 
     # Fill Reco Hists:
     histos.FillHistogram(histos.histo_CE_reconstructed , CE_reco_mom)
@@ -72,11 +73,11 @@ def UsePandas(nbins, mom_low, mom_high,):
         histos.DoDIOWeights(histos.histo_DIO_generated_reweighted , DIO_gen_mom)
 
     # Build Functions:
-    yields = YieldFunctions(histos, nbins, mom_low, mom_high, options.RPCintReco, options.RPCextReco, options.target, showRPC)
+    yields = YieldFunctions(histos, nbins, mom_low, mom_high, options.RPCintReco, options.RPCextReco, options.target, options.exp, showRPC)
 
     # Fill Results
     yields.FillResults()
-    #yields.GetSingleResult(102.5,104.5)
+    yields.GetSingleResult(103.25,104.5)
     #yields.WriteHistograms()
     #res = Resolution_Func(options.CEReco)
     #res.Fit_Resolution()
@@ -113,6 +114,7 @@ if __name__ == "__main__":
     parser.add_option('-u','--RPCintGen', dest='RPCintGen', default = 'RPCGen.root',help='NTuple with RPC', metavar='Rpcdir')
     parser.add_option('-c','--Cosmics', dest='Cosmics', default = 'False',help='NTuple with Cosmics', metavar='Cosmicsdir')
     parser.add_option('-s','--target', dest='target', default = 'mu2e',help='target', metavar='stopsdir')
+    parser.add_option('-e','--exp', dest='exp', default = 'mu2e',help='exp', metavar='expdir')
     parser.add_option('--tag', dest='tag', default = '1',help='file tag', metavar='tag')
 
     (options, args) = parser.parse_args()

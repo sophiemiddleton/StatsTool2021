@@ -45,7 +45,7 @@ class ImportRecoData :
             df = input_tree.pandas.df(flatten=flatten)
         return df
 
-    def GetFeature(self, process, feature, flatten=False ):
+    def GetFeature(self, process, feature, flatten=False, Cuts=False):
         """ Open Root File and Extract Specified field """
         filename = ""
         if process == "signal":
@@ -61,7 +61,8 @@ class ImportRecoData :
         input_file = uproot.open(filename)
         input_tree = input_file[self.TreeName][self.BranchName]
         df = input_tree.pandas.df(flatten=flatten)
-        #df = self.cuts.ApplyCut(df)
+        if Cuts==True:
+            df = self.cuts.ApplyCut(df)
         return df[feature]
 
     def GetMagFeature(self, process, feature_x, feature_y, feature_z, flatten=False ):
