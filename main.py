@@ -19,15 +19,24 @@ from Fitter.Resolution import Resolution_Func
 
 
 def main(options, args):
-    print("Importing Data from: CE", options.CEReco, options.CEGen, "DIO",
+    print("=====================================================================")
+    print("=====================================================================")
+    print("=======================Launching StatsTool===========================")
+    print("=====================Written by S. Middleton=========================")
+    print("==================For the Mu2e-II Sensitvity Study===================")
+    print("=========================smidd@caltech.edu===========================")
+    print("=====================================================================")
+    print("Options: CE", options.CEReco, options.CEGen, "DIO",
 options.DIOReco, options.DIOGen, "internal RPC", options.RPCintReco, options.RPCintGen,
-"external RPC", options.RPCextReco, options.RPCextGen, options.Cosmics)
-    UsePandas(100, 102,105)
+"external RPC", options.RPCextReco, options.RPCextGen, "Cosmics", options.Cosmics, "Target",options.target, "Experiment",options.exp)
+    print("===================calculating stats....please wait....==============")
+    UsePandas(100, 90,110)
 
 def UsePandas(nbins, mom_low, mom_high,):
-
+    # Import the data into panadas dataframes:
     recodata = ImportRecoData(options.CEReco, options.DIOReco, options.RPCextReco, options.RPCintReco)
     gendata = ImportGenData(options.CEGen, options.DIOGen, options.RPCextGen, options.RPCintGen)
+    # Make list of ROOT histograms for analysis (this step should be removed)
     histos = Histograms(nbins, mom_low, mom_high,)
     showRPC = options.showRPC
 
@@ -43,7 +52,7 @@ def UsePandas(nbins, mom_low, mom_high,):
         RPCint_reco_mom = recodata.GetFeature( "RPCint", "deent.mom")
         histos.FillHistogram(histos.histo_extRPC_reconstructed , RPCext_reco_mom)
         histos.FillHistogram(histos.histo_intRPC_reconstructed , RPCint_reco_mom)
-
+    # Options for DIO rad. corrections
     if options.target == 'Ti' :
         histos.DoDIOWeights_Ti(histos.histo_DIO_reconstructed_reweighted , DIO_reco_mom)
     if options.target == 'V' :
@@ -77,8 +86,8 @@ def UsePandas(nbins, mom_low, mom_high,):
 
     # Fill Results
     yields.FillResults()
-    yields.GetSingleResult(103.25,104.5)
-    #yields.WriteHistograms()
+    #yields.GetSingleResult(103.25,104.5)
+    yields.WriteHistograms()
     #res = Resolution_Func(options.CEReco)
     #res.Fit_Resolution()
 

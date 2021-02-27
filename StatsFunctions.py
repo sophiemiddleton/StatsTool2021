@@ -7,7 +7,7 @@ import math
 import numpy
 import ROOT
 from ROOT import TMath
-
+from ROOT import TFeldmanCousins
 class StatsFunctions :
 
     def __init__(self):
@@ -453,3 +453,18 @@ class StatsFunctions :
                      return 0
         else:
             return 999.
+
+    def ROOTFeldmanCousins(self, observed, background_mean):
+
+        f = TFeldmanCousins()
+
+        ul = f.CalculateUpperLimit(observed, background_mean);
+        ll = f.GetLowerLimit();
+
+        print("For " ,observed , " data observed with and estimated background")
+        print("of " , background_mean , " candidates, the Feldman-Cousins method of ")
+        print("calculating confidence limits gives:")
+        print("Upper Limit = " ,  ul )
+        print("Lower Limit = " ,  ll )
+        print("at the 90% CL")
+        return ul #, ll

@@ -17,6 +17,7 @@ from StatsFunctions import *
 class YieldFunctions:
 
         def __init__(self,histos, nbins, mom_low, mom_high, rpc_filename_int, rpc_filename_ext, target, experiment, showRPC=True):
+            self.optiize_for = 'SES'
             self.showRPC = showRPC
             self.momentum_lower_limit = mom_low
             self.momentum_upper_limit = mom_high
@@ -44,9 +45,9 @@ class YieldFunctions:
                 self.signal_end = 105.1
 
             if target == 'Ti':
-                self.muonstopsperPOT = 0.00010125
-                self.sim_ce_eff = 0.67
-                self.sim_dio_eff = 0.67
+                self.muonstopsperPOT = 0.000108
+                self.sim_ce_eff = 0.62
+                self.sim_dio_eff = 0.41
                 self.capturesperStop = 0.85
                 self.decaysperStop = 0.15
                 self.signal_start = 103.25
@@ -238,12 +239,12 @@ class YieldFunctions:
 
             result.efficiency_error_DIO = self.GetDIOEffError(result.N_DIO_rec, result.N_DIO_rec_error, result.N_DIO_gen, result.N_DIO_gen_error);
             result.N_DIO_expected, result.N_DIO_expected_error = self.GetDIOExpectedYield(result.N_DIO_rec,result.N_DIO_gen, result.efficiency_error_DIO,mom_low, mom_high)
-            if(result.N_DIO_expected > 9):
-                result.N_DIO_expected = 9
-            result.Nsig_UL = stats.GetFeldmanCousinsSensitivity(result.N_DIO_expected)
+            #if(result.N_DIO_expected > 9):
+            #    result.N_DIO_expected = 9
+            #result.Nsig_UL = stats.GetFeldmanCousinsSensitivity(result.N_DIO_expected)
             #result.Nsig_UL_error = 999
             #if (result.Nsig_UL != 999):
-
+            result.Nsig_UL = stats.ROOTFeldmanCousins(result.N_DIO_expected, result.N_DIO_expected)
             temp_Nsig_UL_error_lower = result.Nsig_UL - stats.GetFeldmanCousinsSensitivity(result.N_DIO_expected - result.N_DIO_expected_error) #TODO - add RPC/Cosmics
             temp_Nsig_UL_error_upper = stats.GetFeldmanCousinsSensitivity(result.N_DIO_expected + result.N_DIO_expected_error) - result.Nsig_UL
             result.Nsig_UL_error = max(temp_Nsig_UL_error_lower, temp_Nsig_UL_error_upper) # take maximum of errors to avoid asymmetric errors on Nsig_UL
@@ -377,16 +378,17 @@ class YieldFunctions:
                         result.SES_error =  0
                     if (math.isnan(result.SES) or math.isnan(result.SES_error)):
                         break
-                    if(result.N_DIO_expected > 9):
-                        result.N_DIO_expected = 9
-                    result.Nsig_UL = stats.GetFeldmanCousinsSensitivity(result.N_DIO_expected) #TODO + result.N_intRPCs_expected + result.N_extRPCs_expected)
+                    #if(result.N_DIO_expected > 9):
+                    #    result.N_DIO_expected = 9
+                    #result.Nsig_UL = stats.GetFeldmanCousinsSensitivity(result.N_DIO_expected) #TODO + result.N_intRPCs_expected + result.N_extRPCs_expected)
+                    result.Nsig_UL = stats.ROOTFeldmanCousins(result.N_DIO_expected, result.N_DIO_expected)
                     if (math.isnan(result.Nsig_UL)):
                         break
                     print("Expected DIO", result.N_DIO_expected , result.N_DIO_expected_error, result.Nsig_UL)
                     # calculate error on Nsig_UL by calculation of the Feldman-Cousins sensitivity of N_DIO_expected - 1*sigma and N_DIO_expected + 1*sigma, take maximum of both values
                     result.Nsig_UL_error = 999
-                    if(result.N_DIO_expected > 9):
-                        result.N_DIO_expected = 9
+                    #if(result.N_DIO_expected > 9):
+                    #    result.N_DIO_expected = 9
                     if (result.Nsig_UL != 999):
 
                         temp_Nsig_UL_error_lower = result.Nsig_UL - stats.GetFeldmanCousinsSensitivity(result.N_DIO_expected - result.N_DIO_expected_error)
@@ -416,11 +418,20 @@ class YieldFunctions:
             # iterate over results_vector and find the optimal window with respect to the 90% Feldman-Cousins BF upper limit
             temp_index = -1
             temp_BF_UL = 999
+            temp_SES_Opt = -999
             for i, j in enumerate(self.Results):
-                if (self.Results[i].BF_UL < temp_BF_UL and self.Results[i].BF_UL!=0):
-                    temp_index = i
-                    temp_BF_UL = self.Results[i].BF_UL
+                if self.optiize_for == 'BFUL':
+                    print("optimizing for", self.optiize_for)
 
+                    if (self.Results[i].BF_UL < temp_BF_UL and self.Results[i].BF_UL!=0):
+                        temp_index = i
+                        temp_BF_UL = self.Results[i].BF_UL
+                if self.optiize_for == 'SES':
+                    print("optimizing for", self.optiize_for)
+                    
+                    if (self.Results[i].SES > temp_SES_Opt and self.Results[i].SES!=0):
+                        temp_index = i
+                        temp_SES_Opt = self.Results[i].SES
             self.Results[temp_index].optimal_window=1 # set flag to 1 for the entry with the optimal window
             print("Optimal")
             self.Results[temp_index].PrintResults()
@@ -432,6 +443,7 @@ class YieldFunctions:
             c_dio.cd(1)
             self.Histos.histo_DIO_generated_reweighted.Draw('HIST')
             c_dio.cd(2)
+            self.Histos.histo_DIO_reconstructed_reweighted.Scale(1/self.GetDIOSimEff())
             self.Histos.histo_DIO_reconstructed_reweighted.Draw('HIST')
             c_dio.SaveAs("DIO."+str(self.target)+".root")
 
@@ -440,6 +452,7 @@ class YieldFunctions:
             c_signal.cd(1)
             self.Histos.histo_CE_generated.Draw('HIST')
             c_signal.cd(2)
+            self.Histos.histo_CE_reconstructed.Scale(1/self.GetCESimEff())
             self.Histos.histo_CE_reconstructed.Draw('HIST')
             c_signal.SaveAs("CE."+str(self.target)+".root")
 
