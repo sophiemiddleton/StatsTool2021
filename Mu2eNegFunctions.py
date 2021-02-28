@@ -13,63 +13,23 @@ from DIO import DIO
 from RPC import RPC
 from CE import CE
 from StatsFunctions import *
+from Constants import *
 
 class YieldFunctions:
 
-        def __init__(self,histos, nbins, mom_low, mom_high, rpc_filename_int, rpc_filename_ext, target, experiment, showRPC=True):
-            self.optiize_for = 'SES'
+        def __init__(self,histos, nbins, mom_low, mom_high, rpc_filename_int, rpc_filename_ext, constants, showRPC=True):
+            self.optiize_for = 'BFUL'
             self.showRPC = showRPC
             self.momentum_lower_limit = mom_low
             self.momentum_upper_limit = mom_high
             self.nBins = nbins
             self.momentum_Bin_width = (mom_high - mom_low)/nbins
-            self.livegate = 700
-            self.POT_CD3= 3.6e20
-            self.POT_Run1= 3.76e19
-            self.POT_mu2e2 = 5e22
-            # For Al as default:
-            self.capturesperStop = 0.609
-            self.decaysperStop = 0.391
-            self.muonstopsperPOT = 0.00153814
-            # Default assumes no failed jobs:
-            self.sim_ce_eff = 1
-            self.sim_dio_eff = 1
-            self.target = target
-            self.experiment = experiment
-
-            if target == 'Al':
-                self.muonstopsperPOT = 0.00153814
-                self.sim_ce_eff = 0.77
-                self.sim_dio_eff = 0.47
-                self.signal_start = 103.85
-                self.signal_end = 105.1
-
-            if target == 'Ti':
-                self.muonstopsperPOT = 0.000108
-                self.sim_ce_eff = 0.62
-                self.sim_dio_eff = 0.41
-                self.capturesperStop = 0.85
-                self.decaysperStop = 0.15
-                self.signal_start = 103.25
-                self.signal_end = 104.5
-
-            if target == 'V':
-                #self.muonstopsperPOT = 0.00224 # - 34
-                #self.muonstopsperPOT = 0.00243 #- 37
-                #self.muonstopsperPOT = 0.00209 # - 30
-                self.sim_ce_eff = 0.42
-                self.sim_dio_eff = 0.62
-                self.capturesperStop = 0.87
-                self.decaysperStop = 0.13
-                self.signal_start = 103.0
-                self.signal_end = 104.25
-
-            print("main", target, self.sim_ce_eff, self.muonstopsperPOT, self.capturesperStop)
+            self.constants = constants
             self.Histos = histos
             self.Results = []
             self.DIO = DIO()
-            self.RPC = RPC(self.Histos,rpc_filename_int, rpc_filename_ext, self.momentum_lower_limit,self.momentum_upper_limit, self.livegate, target)
             self.CE = CE()
+            self.RPC = RPC(self.Histos,rpc_filename_int, rpc_filename_ext, self.momentum_lower_limit,self.momentum_upper_limit, self.constants.livegate, self.constants.target)
 
         def MomLowLimit(self):
             return self.momentum_lower_limit
@@ -87,33 +47,28 @@ class YieldFunctions:
             return self.momentum_Bin_width
 
         def SignalRegionStart(self):
-            return self.signal_start
+            return self.constants.signal_start
 
         def SignalRegionEnd(self):
-            return self.signal_end
+            return self.constants.signal_end
 
         def GetPOT(self):
-            POT = 1
-            if self.experiment == 'mu2e':
-                POT = self.POT_CD3
-            if self.experiment == 'mu2e2':
-                POT = self.POT_mu2e2
-            print("Protons",POT)
-            return POT
+            return self.constants.POT
+
         def CapturesPerStop(self):
-            return self.capturesperStop
+            return self.constants.capturesperStop
 
         def DecaysPerStop(self):
-            return self.decaysperStop
+            return self.constants.decaysperStop
 
         def MuonStopsPerPOT(self):
-            return self.muonstopsperPOT
+            return self.constants.muonstopsperPOT
 
         def GetCESimEff(self):
-            return self.sim_ce_eff
+            return self.constants.sim_ce_eff
 
         def GetDIOSimEff(self):
-            return self.sim_dio_eff
+            return self.constants.sim_dio_eff
 
         def GetIntegral(self, histo, mom_low, mom_high):
             # Translate mom_low and mom_up in bin numbers
@@ -173,7 +128,7 @@ class YieldFunctions:
             return SES
 
         def GetDIOExpectedYield(self, N_DIO_rec, N_DIO_gen, efficiency_error_DIO, mom_low, mom_high):
-            CzerneckiIntegral = self.DIO.GetInt(mom_low, mom_high,self.target)
+            CzerneckiIntegral = self.DIO.GetInt(mom_low, mom_high,self.constants.target)
             N_DIO_expected = N_DIO_rec * CzerneckiIntegral * self.GetPOT() * self.MuonStopsPerPOT() * self.DecaysPerStop() / N_DIO_gen
             N_DIO_expected_error = CzerneckiIntegral * self.GetPOT() * self.MuonStopsPerPOT() * self.DecaysPerStop() * efficiency_error_DIO
             # compute error on N_DIO_expected from error on the efficiency
@@ -261,7 +216,6 @@ class YieldFunctions:
             while(mom_low < self.MomHighLimit()):
                 mom_high = mom_low + self.momentum_Bin_width
                 while(mom_high < self.MomHighLimit()):
-                    print("Evaluating", mom_low, mom_high)
                     #perform calculations, check results for reasanable values and for infinity or NaN, save results
                     result = Results()
                     result.momentum_low = mom_low
@@ -428,7 +382,7 @@ class YieldFunctions:
                         temp_BF_UL = self.Results[i].BF_UL
                 if self.optiize_for == 'SES':
                     print("optimizing for", self.optiize_for)
-                    
+
                     if (self.Results[i].SES > temp_SES_Opt and self.Results[i].SES!=0):
                         temp_index = i
                         temp_SES_Opt = self.Results[i].SES
@@ -445,7 +399,7 @@ class YieldFunctions:
             c_dio.cd(2)
             self.Histos.histo_DIO_reconstructed_reweighted.Scale(1/self.GetDIOSimEff())
             self.Histos.histo_DIO_reconstructed_reweighted.Draw('HIST')
-            c_dio.SaveAs("DIO."+str(self.target)+".root")
+            c_dio.SaveAs("DIO."+str(self.constants.target)+".root")
 
             c_signal=TCanvas()
             c_signal.Divide(2,2)
@@ -454,7 +408,7 @@ class YieldFunctions:
             c_signal.cd(2)
             self.Histos.histo_CE_reconstructed.Scale(1/self.GetCESimEff())
             self.Histos.histo_CE_reconstructed.Draw('HIST')
-            c_signal.SaveAs("CE."+str(self.target)+".root")
+            c_signal.SaveAs("CE."+str(self.constants.target)+".root")
 
             c_r=TCanvas()
             c_r.cd(1)
@@ -466,4 +420,4 @@ class YieldFunctions:
                     ir = (n/self.GetDIOSimEff())/d
                     ratio.Fill(ir)
             ratio.Draw('HIST')
-            c_r.SaveAs("ratio"+str(self.target)+".root")
+            c_r.SaveAs("ratio"+str(self.constants.target)+".root")

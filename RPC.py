@@ -25,25 +25,9 @@ class RPC() :
         self.Ngen_int  = 1e8
         self.Ngen_ext = 1e9
         self.pions = "../RPC/Pionsv2.root"
-        
-        if target == 'mu2e':
+
+        if target == 'Al':
             self.pions = "../RPC/Pionsv2.root"
-        if target == '42foils':
-            self.pions = "../StatsTool_Data/StoppedPions/StoppingTarget_42Foils_Pions.root"
-        if target == 'hex':
-            self.pions = "../StatsTool_Data/StoppedPions/StoppingTarget_Hex_Pions.root"
-        if target == 'cylindermesh':
-            self.pions = "../StatsTool_Data/StoppedPions/StopTarget_CylinderMesh_Pions.root"
-        if target == 'screendefault':
-            self.pions = "../StatsTool_Data/StoppedPions/StoppingTarget_ScreenDefault_Pions.root"
-        if target == 'cylinderdefault':
-            self.pions = "../StatsTool_Data/StoppedPions/StopTarget_CylinderDefault_Pions.root"
-        if target == 'screenmesh':
-            self.pions = "../StatsTool_Data/StoppedPions/StoppingTarget_MeshScreen_Pions.root"
-        if target == 'screenholemesh':
-            self.pions = "../StatsTool_Data/StoppedPions/StoppingTarget_SHM_Pions.root"
-        if target == 'screenhole':
-            self.pions = "../StatsTool_Data/StoppedPions/StoppingTarget_ScreenHole_Pions.root"
         print(target, self.pions)
         # Fill Sums in Signal Regions:
 

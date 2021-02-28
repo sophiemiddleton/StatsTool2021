@@ -118,19 +118,19 @@ class DIO :
             f = lambda x:self.DIOcz_Ti(x)
 
             intergral = integrate.quad(f, mom_low,mom_high)
-            print("intergral",intergral)
+            #print("intergral",intergral)
             return intergral[0]
         if target == 'V':
             f = lambda x:self.DIOcz_V(x)
 
             intergral = integrate.quad(f, mom_low,mom_high)
-            print("intergral",intergral)
+            #print("intergral",intergral)
             return intergral[0]
         if target == 'Al':
             f = lambda x:self.DIOcz(x)
 
             intergral = integrate.quad(f, mom_low,mom_high)
-            print("intergral",intergral)
+            #print("intergral",intergral)
             return intergral[0]
 
 

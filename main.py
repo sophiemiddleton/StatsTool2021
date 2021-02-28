@@ -13,6 +13,7 @@ from ImportRecoData import ImportRecoData
 from ImportGenData import ImportGenData
 from Histograms import Histograms
 from Mu2eNegFunctions import *
+from Constants import *
 from Results import Results
 from ROOT import TCanvas
 from Fitter.Resolution import Resolution_Func
@@ -81,15 +82,15 @@ def UsePandas(nbins, mom_low, mom_high,):
     if options.target == 'Al' :
         histos.DoDIOWeights(histos.histo_DIO_generated_reweighted , DIO_gen_mom)
 
+    constants = Constants(options.target, options.exp)
     # Build Functions:
-    yields = YieldFunctions(histos, nbins, mom_low, mom_high, options.RPCintReco, options.RPCextReco, options.target, options.exp, showRPC)
+    yields = YieldFunctions(histos, nbins, mom_low, mom_high, options.RPCintReco, options.RPCextReco, constants, showRPC)
+    print(constants.fixed_window_lower)
 
     # Fill Results
     yields.FillResults()
-    #yields.GetSingleResult(103.25,104.5)
+    yields.GetSingleResult(constants.fixed_window_lower, constants.fixed_window_upper)
     yields.WriteHistograms()
-    #res = Resolution_Func(options.CEReco)
-    #res.Fit_Resolution()
 
 def plot1DHist(file_name, tree_name, branch_name, feature_name):
     """ Basic funciton to make a plot of a feature """
