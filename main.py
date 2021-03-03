@@ -27,32 +27,42 @@ def main(options, args):
     print("==================For the Mu2e-II Sensitvity Study===================")
     print("=========================smidd@caltech.edu===========================")
     print("=====================================================================")
-    print("Options: CE", options.CEReco, options.CEGen, "DIO",
+    print("Users Options: CE", options.CEReco, options.CEGen, "DIO",
 options.DIOReco, options.DIOGen, "internal RPC", options.RPCintReco, options.RPCintGen,
 "external RPC", options.RPCextReco, options.RPCextGen, "Cosmics", options.Cosmics, "Target",options.target, "Experiment",options.exp)
     print("===================calculating stats....please wait....==============")
+
+    # Pandas offers the most flexible analysis - arguments are used for window optimization only:
     UsePandas(100, 100,110)
+    # TODO- add a UseROOT version
 
 def UsePandas(nbins, mom_low, mom_high,):
+
     # Import the data into panadas dataframes:
     recodata = ImportRecoData(options.CEReco, options.DIOReco, options.RPCextReco, options.RPCintReco)
     gendata = ImportGenData(options.CEGen, options.DIOGen, options.RPCextGen, options.RPCintGen)
+
     # Make list of ROOT histograms for analysis (this step should be removed)
     histos = Histograms(nbins, mom_low, mom_high,)
+
+    # optional inclusion of RPC (off for non-Al since we dont know the spectrum)
     showRPC = options.showRPC
 
-    #Get Data:
+    # Fille Reco dataframs (Note last arguement sets DoCuts - look at cuts.py for options)
     DIO_reco_mom = recodata.GetFeature( "DIO", "deent.mom",False,True)
     CE_reco_mom = recodata.GetFeature( "signal", "deent.mom",False,True)
 
     # Fill Reco Hists:
     histos.FillHistogram(histos.histo_CE_reconstructed , CE_reco_mom)
     histos.FillHistogram(histos.histo_DIO_reconstructed_flat , DIO_reco_mom)
+
+    # Fill RPC if asked for
     if(showRPC):
         RPCext_reco_mom = recodata.GetFeature( "RPCext", "deent.mom")
         RPCint_reco_mom = recodata.GetFeature( "RPCint", "deent.mom")
         histos.FillHistogram(histos.histo_extRPC_reconstructed , RPCext_reco_mom)
         histos.FillHistogram(histos.histo_intRPC_reconstructed , RPCint_reco_mom)
+
     # Options for DIO rad. corrections
     if options.target == 'Ti' :
         histos.DoDIOWeights_Ti(histos.histo_DIO_reconstructed_reweighted , DIO_reco_mom)
@@ -61,7 +71,7 @@ def UsePandas(nbins, mom_low, mom_high,):
     if options.target == 'Al':
         histos.DoDIOWeights(histos.histo_DIO_reconstructed_reweighted , DIO_reco_mom)
 
-    # Fill Gen:
+    # Fill Generation dataframs:
     DIO_gen_mom = gendata.GetFeature("DIO", "TMom")
     CE_gen_mom = gendata.GetFeature("signal", "TMom")
 
@@ -82,14 +92,20 @@ def UsePandas(nbins, mom_low, mom_high,):
     if options.target == 'Al' :
         histos.DoDIOWeights(histos.histo_DIO_generated_reweighted , DIO_gen_mom)
 
+    # Import constants - this is were we store nPOT, capture/decay rates etc.
+    # Edit the constants if you have a new design to reflect that.
     constants = Constants(options.target, options.exp)
-    # Build Functions:
-    yields = YieldFunctions(histos, nbins, mom_low, mom_high, options.RPCintReco, options.RPCextReco, constants, showRPC)
-    print(constants.fixed_window_lower)
 
-    # Fill Results
+    # Build Mu2e yields Functions:
+    yields = YieldFunctions(histos, nbins, mom_low, mom_high, options.RPCintReco, options.RPCextReco, constants, showRPC)
+
+    # Fill Results i.e. optimial window (requires work)
     yields.FillResults()
+
+    # Get SES/BFUL/Eff for fixed signal window:
     yields.GetSingleResult(constants.fixed_window_lower, constants.fixed_window_upper)
+
+    # Save plots:
     yields.WriteHistograms()
 
 def plot1DHist(file_name, tree_name, branch_name, feature_name):
