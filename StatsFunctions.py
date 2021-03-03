@@ -454,17 +454,17 @@ class StatsFunctions :
         else:
             return 999.
 
-    def ROOTFeldmanCousins(self, observed, background_mean):
+    def ROOTFeldmanCousins(self, observed, background_mean,debug=False):
 
         f = TFeldmanCousins()
 
         ul = f.CalculateUpperLimit(observed, background_mean);
         ll = f.GetLowerLimit();
-
-        print("For " ,observed , " data observed with and estimated background")
-        print("of " , background_mean , " candidates, the Feldman-Cousins method of ")
-        print("calculating confidence limits gives:")
-        print("Upper Limit = " ,  ul )
-        print("Lower Limit = " ,  ll )
-        print("at the 90% CL")
+        if debug :
+            print("For " ,observed , " data observed with and estimated background")
+            print("of " , background_mean , " candidates, the Feldman-Cousins method of ")
+            print("calculating confidence limits gives:")
+            print("Upper Limit = " ,  ul )
+            print("Lower Limit = " ,  ll )
+            print("at the 90% CL")
         return ul #, ll

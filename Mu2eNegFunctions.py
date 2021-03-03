@@ -18,7 +18,7 @@ from Constants import *
 class YieldFunctions:
 
         def __init__(self,histos, nbins, mom_low, mom_high, rpc_filename_int, rpc_filename_ext, constants, showRPC=True):
-            self.optiize_for = 'BFUL'
+            self.optimize_for = 'BFUL'
             self.showRPC = showRPC
             self.momentum_lower_limit = mom_low
             self.momentum_upper_limit = mom_high
@@ -94,7 +94,7 @@ class YieldFunctions:
 
         def GetRecoEff(self, Nrec, Ngen, simeff):
             efficiency = (Nrec/simeff) / Ngen
-            print("rec, gen", Nrec, Ngen)
+            # print("rec, gen", Nrec, Ngen)
             return efficiency
 
         def GetRecoEffError(self, Nrec, Ngen):
@@ -118,7 +118,7 @@ class YieldFunctions:
         def GetSES(self, efficiency_CE):
             # calculate single event sensitivity (SES), corresponds to branching fraction where 1 signal event is observed
             SES = 1. / ( self.GetPOT() * self.MuonStopsPerPOT() * self.CapturesPerStop() * efficiency_CE  )
-            print(self.GetPOT() , self.MuonStopsPerPOT() , self.CapturesPerStop() , efficiency_CE)
+            # print(self.GetPOT() , self.MuonStopsPerPOT() , self.CapturesPerStop() , efficiency_CE)
             return SES
 
         def GetSESError(self, efficiency_CE, efficiency_error_CE):
@@ -132,14 +132,14 @@ class YieldFunctions:
             N_DIO_expected = N_DIO_rec * CzerneckiIntegral * self.GetPOT() * self.MuonStopsPerPOT() * self.DecaysPerStop() / N_DIO_gen
             N_DIO_expected_error = CzerneckiIntegral * self.GetPOT() * self.MuonStopsPerPOT() * self.DecaysPerStop() * efficiency_error_DIO
             # compute error on N_DIO_expected from error on the efficiency
-            if (abs(mom_low - self.SignalRegionStart()) < 0.01 and abs(mom_high - self.SignalRegionEnd()) < 0.01):
-                print( "===========================================================================")
-                print( "N_DIO_rec = " , N_DIO_rec )
-                print( "N_DIO_gen = " , N_DIO_gen )
-                print( "Czernecki Integral = " , CzerneckiIntegral )
-                print( "N_DIO_expected = " , N_DIO_expected )
-                print( "N_DIO_expected_error = " , N_DIO_expected_error)
-            print(N_DIO_rec,CzerneckiIntegral ,self.GetPOT(),self.MuonStopsPerPOT(),self.DecaysPerStop() , N_DIO_gen, N_DIO_expected)
+            #if (abs(mom_low - self.SignalRegionStart()) < 0.01 and abs(mom_high - self.SignalRegionEnd()) < 0.01):
+            #    print( "===========================================================================")
+            #    print( "N_DIO_rec = " , N_DIO_rec )
+            #    print( "N_DIO_gen = " , N_DIO_gen )
+            #    print( "Czernecki Integral = " , CzerneckiIntegral )
+            #    print( "N_DIO_expected = " , N_DIO_expected )
+            #    print( "N_DIO_expected_error = " , N_DIO_expected_error)
+            #print(N_DIO_rec,CzerneckiIntegral ,self.GetPOT(),self.MuonStopsPerPOT(),self.DecaysPerStop() , N_DIO_gen, N_DIO_expected)
             return N_DIO_expected, N_DIO_expected_error
 
         def GetInternalRPCExpectedYield(self, N_RPCs_expected, N_RPCs_expected_error, mom_low, mom_high, eff):
@@ -215,6 +215,7 @@ class YieldFunctions:
             Ngen_CE = self.Histos.histo_CE_generated.GetEntries()
             while(mom_low < self.MomHighLimit()):
                 mom_high = mom_low + self.momentum_Bin_width
+
                 while(mom_high < self.MomHighLimit()):
                     #perform calculations, check results for reasanable values and for infinity or NaN, save results
                     result = Results()
@@ -235,8 +236,9 @@ class YieldFunctions:
 
                     if(result.N_CE_gen !=0):
                         result.efficiency_CE = self.GetRecoEff(result.N_CE_rec,result.N_CE_gen, self.GetCESimEff())
-                    else:
-                        result.efficiency_CE = 1
+                    if(result.N_CE_gen ==0):
+                        break
+
                     if (math.isnan(result.efficiency_CE)):
                          break
 
@@ -244,7 +246,7 @@ class YieldFunctions:
                         result.efficiency_error_CE = self.GetRecoEffError(result.N_CE_rec,result.N_CE_gen)
                     else :
                         result.efficiency_error_CE = 1
-                    if (math.isnan(result.efficiency_error_CE) or result.N_CE_gen == 0):
+                    if (math.isnan(result.efficiency_error_CE)):
                         break
 
                     result.N_CE_expected = self.GetSignalExpectedYield(result.efficiency_CE)
@@ -260,7 +262,7 @@ class YieldFunctions:
                         break
                     if(result.N_DIO_gen == 0):
                         break
-                    print("Results.N_DIO_gen = ",result.N_DIO_gen)
+                    #print("Results.N_DIO_gen = ",result.N_DIO_gen)
 
                     result.N_DIO_gen_error = self.GetNError(self.Histos.histo_DIO_generated_reweighted, mom_low, mom_high)
                     if (math.isnan(result.N_DIO_gen_error)):
@@ -270,12 +272,12 @@ class YieldFunctions:
                     if (math.isnan(result.N_DIO_rec)):
                         break
 
-                    print("Result.N_DIO_rec = ",result.N_DIO_rec)
+                    #print("Result.N_DIO_rec = ",result.N_DIO_rec)
                     if(self.showRPC == True):
                         result.N_intRPC_rec = self.GetN(self.Histos.histo_intRPC_reconstructed, mom_low, mom_high)
                         if (math.isnan(result.N_intRPC_rec)):
                             break
-                        print("Result.N_intRPC_rec = ",result.N_intRPC_rec)
+                        #print("Result.N_intRPC_rec = ",result.N_intRPC_rec)
 
                         result.N_intRPC_gen = self.GetN(self.Histos.histo_intRPC_generated, mom_low, mom_high)
                         if (math.isnan(result.N_intRPC_gen)):
@@ -284,7 +286,7 @@ class YieldFunctions:
                         result.N_extRPC_rec = self.GetN(self.Histos.histo_extRPC_reconstructed, mom_low, mom_high)
                         if (math.isnan(result.N_extRPC_rec)):
                             break
-                        print("Result.N_extRPC_rec = ",result.N_extRPC_rec)
+                        #print("Result.N_extRPC_rec = ",result.N_extRPC_rec)
 
                         result.N_extRPC_gen = self.GetN(self.Histos.histo_extRPC_generated, mom_low, mom_high)
                         if (math.isnan(result.N_extRPC_gen)):
@@ -338,7 +340,7 @@ class YieldFunctions:
                     result.Nsig_UL = stats.ROOTFeldmanCousins(result.N_DIO_expected, result.N_DIO_expected)
                     if (math.isnan(result.Nsig_UL)):
                         break
-                    print("Expected DIO", result.N_DIO_expected , result.N_DIO_expected_error, result.Nsig_UL)
+                    #print("Expected DIO", result.N_DIO_expected , result.N_DIO_expected_error, result.Nsig_UL)
                     # calculate error on Nsig_UL by calculation of the Feldman-Cousins sensitivity of N_DIO_expected - 1*sigma and N_DIO_expected + 1*sigma, take maximum of both values
                     result.Nsig_UL_error = 999
                     #if(result.N_DIO_expected > 9):
@@ -356,7 +358,7 @@ class YieldFunctions:
 
                     if (math.isnan(result.BF_UL_error)):
                         break
-                    print("BFUL", result.BF_UL)
+                    #print("BFUL", result.BF_UL)
                     if (math.isnan(result.BF_UL)):
                         break
 
@@ -372,18 +374,15 @@ class YieldFunctions:
             # iterate over results_vector and find the optimal window with respect to the 90% Feldman-Cousins BF upper limit
             temp_index = -1
             temp_BF_UL = 999
-            temp_SES_Opt = -999
+            temp_SES_Opt = 999
             for i, j in enumerate(self.Results):
-                if self.optiize_for == 'BFUL':
-                    print("optimizing for", self.optiize_for)
-
+                if self.optimize_for == 'BFUL':
                     if (self.Results[i].BF_UL < temp_BF_UL and self.Results[i].BF_UL!=0):
                         temp_index = i
                         temp_BF_UL = self.Results[i].BF_UL
-                if self.optiize_for == 'SES':
-                    print("optimizing for", self.optiize_for)
+                if self.optimize_for == 'SES':
 
-                    if (self.Results[i].SES > temp_SES_Opt and self.Results[i].SES!=0):
+                    if (self.Results[i].SES < temp_SES_Opt and self.Results[i].SES!=0):
                         temp_index = i
                         temp_SES_Opt = self.Results[i].SES
             self.Results[temp_index].optimal_window=1 # set flag to 1 for the entry with the optimal window

@@ -31,7 +31,7 @@ def main(options, args):
 options.DIOReco, options.DIOGen, "internal RPC", options.RPCintReco, options.RPCintGen,
 "external RPC", options.RPCextReco, options.RPCextGen, "Cosmics", options.Cosmics, "Target",options.target, "Experiment",options.exp)
     print("===================calculating stats....please wait....==============")
-    UsePandas(100, 90,110)
+    UsePandas(100, 100,110)
 
 def UsePandas(nbins, mom_low, mom_high,):
     # Import the data into panadas dataframes:
