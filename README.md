@@ -69,6 +69,17 @@ To run the code use the ```driver.sh``` script, edit the paths accordingly, in t
 
 where you should replaced the ```...``` with the appropriate ROOT file.
 
+# Cuts options
+
+The ```cuts.py``` interface contains lists of cuts. We nominally use the SU2020 cuts for now.
+
+You can opt out of cuts by setting the final parameter in the lines (in ```main.py```):
+
+```DIO_reco_mom = recodata.GetFeature( "DIO", "deent.mom",False,True)
+  CE_reco_mom = recodata.GetFeature( "signal", "deent.mom",False,True)```
+
+  to ```False```.
+
 # Software Prereq.
 
 To begin using this analysis package it is recommended that you install a few pre-requsities.
