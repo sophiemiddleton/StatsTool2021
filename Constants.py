@@ -1,6 +1,6 @@
 # Author : S Middleton
 # Date : 2021
-# Purpose : Constants
+# Purpose : Stores any constants used by the analysis
 
 class Constants:
 
@@ -47,6 +47,7 @@ class Constants:
                 self.signal_end = 104.25
                 self.fixed_window_lower = 103.0
                 self.fixed_window_upper = 104.25
+
 
             print("===================Information:============================")
             print("Number of Protons on Target:", self.POT)

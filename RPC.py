@@ -1,6 +1,6 @@
 # Author: S Middleton
 # Data : 2020
-# Description : Hold info for RPC calculations
+# Description : Caries out all RPC related calculation. Requires a path to the stopped pions NTuple
 
 import sys
 import uproot
@@ -9,7 +9,7 @@ import pandas
 
 class RPC() :
 
-    def __init__(self, histos,intfile,extfile, min, max, livegate, target, treename="TrkAnaNeg", branchname="trkana"):
+    def __init__(self, histos, intfile, extfile, min, max, livegate, target, treename="TrkAnaNeg", branchname="trkana"):
         self.process = "RPC"
         self.POT = 1e8
         self.frpc = 0.0215
@@ -28,9 +28,8 @@ class RPC() :
 
         if target == 'Al':
             self.pions = "../RPC/Pionsv2.root"
-        print(target, self.pions)
-        # Fill Sums in Signal Regions:
 
+        # Fill Sums in Signal Regions:
         input_file_int = uproot.open(intfile)
         input_tree_int = input_file_int[treename][branchname]
         df_int = input_tree_int.pandas.df(flatten=False)

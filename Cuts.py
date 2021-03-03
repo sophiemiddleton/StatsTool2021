@@ -1,3 +1,7 @@
+# Author : S Middleton
+# Date : 2021
+# Purpose : Stores optional cuts
+
 import sys
 
 class Cuts() :
@@ -21,6 +25,7 @@ class Cuts() :
                   "deent.mom" : [95., float("inf")]   #recomom
 
                 }
+
         if opt is 'su2020':
                 self.Cut_List =  {
                       "de.t0" : [700., 1695],    #inTimeWindow
@@ -29,10 +34,8 @@ class Cuts() :
                       "dequal.TrkQual" : [0.2, float("inf")],  #TrkQual
                     }
 
-
     def ApplyCut(self, df):
         df_cut = df
         for key, value in self.Cut_List.items():
             df_cut = df_cut[(df_cut[key] > value[0]) & (df_cut[key] <= value[1])]
-
         return df_cut
