@@ -67,7 +67,7 @@ To run the code use the ```driver.sh``` script, edit the paths accordingly, in t
 
 ```python main.py --CE ... --DIO ... --RPC ... --Cosmics```
 
-where you should replaced the ```...``` with the appropriate ROOT file.
+where you should replaced the dots with the appropriate ROOT file.
 
 # Cuts options
 
@@ -75,10 +75,10 @@ The ```cuts.py``` interface contains lists of cuts. We nominally use the SU2020 
 
 You can opt out of cuts by setting the final parameter in the lines (in ```main.py```):
 
-```DIO_reco_mom = recodata.GetFeature( "DIO", "deent.mom",False,True)
-  CE_reco_mom = recodata.GetFeature( "signal", "deent.mom",False,True)```
+```DIO_reco_mom = recodata.GetFeature( "DIO", "deent.mom",False,True)```
+```CE_reco_mom = recodata.GetFeature( "signal", "deent.mom",False,True)```
 
-  to ```False```.
+to ```False```.
 
 # Software Prereq.
 
